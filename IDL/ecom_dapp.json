@@ -1,0 +1,1480 @@
+{
+  "address": "FYo4gi69vTJZJMnNxj2mZz2Q9CbUu12rQDVtHNUFQ2o7",
+  "metadata": {
+    "name": "ecom_dapp",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "Created with Anchor"
+  },
+  "instructions": [
+    {
+      "name": "add_to_cart",
+      "discriminator": [
+        26,
+        59,
+        128,
+        236,
+        247,
+        119,
+        16,
+        238
+      ],
+      "accounts": [
+        {
+          "name": "consumer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "cart",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  97,
+                  114,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "consumer"
+              },
+              {
+                "kind": "arg",
+                "path": "product_name"
+              }
+            ]
+          }
+        },
+        {
+          "name": "products",
+          "writable": true
+        },
+        {
+          "name": "cart_list",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  97,
+                  114,
+                  116,
+                  95,
+                  108,
+                  105,
+                  115,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "consumer"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "product_name",
+          "type": "string"
+        },
+        {
+          "name": "quantity",
+          "type": "u32"
+        },
+        {
+          "name": "seller_pubkey",
+          "type": "pubkey"
+        },
+        {
+          "name": "product_imgurl",
+          "type": "string"
+        },
+        {
+          "name": "price",
+          "type": "u32"
+        }
+      ]
+    },
+    {
+      "name": "create_escrow",
+      "discriminator": [
+        253,
+        215,
+        165,
+        116,
+        36,
+        108,
+        68,
+        80
+      ],
+      "accounts": [
+        {
+          "name": "owner",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "escrow",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  101,
+                  115,
+                  99,
+                  114,
+                  111,
+                  119
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "owner"
+              }
+            ]
+          }
+        },
+        {
+          "name": "payment",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  97,
+                  121,
+                  109,
+                  101,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "owner"
+              }
+            ]
+          }
+        },
+        {
+          "name": "user_ata",
+          "writable": true
+        },
+        {
+          "name": "escrow_ata",
+          "writable": true
+        },
+        {
+          "name": "buyer_ata",
+          "writable": true
+        },
+        {
+          "name": "seller_ata",
+          "writable": true
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "buyer_pubkey",
+          "type": "pubkey"
+        },
+        {
+          "name": "seller_pubkey",
+          "type": "pubkey"
+        },
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "create_order",
+      "discriminator": [
+        141,
+        54,
+        37,
+        207,
+        237,
+        210,
+        250,
+        215
+      ],
+      "accounts": [
+        {
+          "name": "signer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "order",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  111,
+                  114,
+                  100,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "signer"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "payment_id",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "create_payment",
+      "discriminator": [
+        28,
+        81,
+        85,
+        253,
+        7,
+        223,
+        154,
+        42
+      ],
+      "accounts": [
+        {
+          "name": "signer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "payments",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  97,
+                  121,
+                  109,
+                  101,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "signer"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "payment_amount",
+          "type": "u64"
+        },
+        {
+          "name": "product_pubkey",
+          "type": "pubkey"
+        },
+        {
+          "name": "tx_signature",
+          "type": {
+            "option": "string"
+          }
+        }
+      ]
+    },
+    {
+      "name": "create_product",
+      "discriminator": [
+        183,
+        155,
+        202,
+        119,
+        43,
+        114,
+        174,
+        225
+      ],
+      "accounts": [
+        {
+          "name": "seller",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "product",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  114,
+                  111,
+                  100,
+                  117,
+                  99,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "seller"
+              },
+              {
+                "kind": "arg",
+                "path": "product_name"
+              }
+            ]
+          }
+        },
+        {
+          "name": "product_list",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  114,
+                  111,
+                  100,
+                  117,
+                  99,
+                  116,
+                  95,
+                  108,
+                  105,
+                  115,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "seller"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "product_name",
+          "type": "string"
+        },
+        {
+          "name": "product_short_description",
+          "type": "string"
+        },
+        {
+          "name": "price",
+          "type": "u32"
+        },
+        {
+          "name": "category",
+          "type": {
+            "defined": {
+              "name": "Category"
+            }
+          }
+        },
+        {
+          "name": "division",
+          "type": {
+            "defined": {
+              "name": "Division"
+            }
+          }
+        },
+        {
+          "name": "seller_name",
+          "type": "string"
+        },
+        {
+          "name": "product_imgurl",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "deposit_escrow",
+      "discriminator": [
+        226,
+        112,
+        158,
+        176,
+        178,
+        118,
+        153,
+        128
+      ],
+      "accounts": [
+        {
+          "name": "owner",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "escrow",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  101,
+                  115,
+                  99,
+                  114,
+                  111,
+                  119
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "owner"
+              }
+            ]
+          }
+        },
+        {
+          "name": "payment",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  97,
+                  121,
+                  109,
+                  101,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "owner"
+              }
+            ]
+          }
+        },
+        {
+          "name": "user_ata",
+          "writable": true
+        },
+        {
+          "name": "escrow_ata",
+          "writable": true
+        },
+        {
+          "name": "buyer_ata",
+          "writable": true
+        },
+        {
+          "name": "seller_ata",
+          "writable": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ],
+      "args": [
+        {
+          "name": "_product_id",
+          "type": "u32"
+        }
+      ]
+    },
+    {
+      "name": "withdraw_escrow",
+      "discriminator": [
+        81,
+        84,
+        226,
+        128,
+        245,
+        47,
+        96,
+        104
+      ],
+      "accounts": [
+        {
+          "name": "owner",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "escrow",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  101,
+                  115,
+                  99,
+                  114,
+                  111,
+                  119
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "owner"
+              }
+            ]
+          }
+        },
+        {
+          "name": "payment",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  97,
+                  121,
+                  109,
+                  101,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "owner"
+              }
+            ]
+          }
+        },
+        {
+          "name": "user_ata",
+          "writable": true
+        },
+        {
+          "name": "escrow_ata",
+          "writable": true
+        },
+        {
+          "name": "buyer_ata",
+          "writable": true
+        },
+        {
+          "name": "seller_ata",
+          "writable": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ],
+      "args": [
+        {
+          "name": "_product_id",
+          "type": "u32"
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "Cart",
+      "discriminator": [
+        110,
+        9,
+        100,
+        44,
+        36,
+        143,
+        131,
+        88
+      ]
+    },
+    {
+      "name": "CartList",
+      "discriminator": [
+        25,
+        206,
+        228,
+        30,
+        190,
+        207,
+        217,
+        135
+      ]
+    },
+    {
+      "name": "Escrow",
+      "discriminator": [
+        31,
+        213,
+        123,
+        187,
+        186,
+        22,
+        218,
+        155
+      ]
+    },
+    {
+      "name": "Order",
+      "discriminator": [
+        134,
+        173,
+        223,
+        185,
+        77,
+        86,
+        28,
+        51
+      ]
+    },
+    {
+      "name": "Payment",
+      "discriminator": [
+        227,
+        231,
+        51,
+        26,
+        244,
+        88,
+        4,
+        148
+      ]
+    },
+    {
+      "name": "Product",
+      "discriminator": [
+        102,
+        76,
+        55,
+        251,
+        38,
+        73,
+        224,
+        229
+      ]
+    },
+    {
+      "name": "ProductsList",
+      "discriminator": [
+        149,
+        195,
+        105,
+        191,
+        84,
+        99,
+        84,
+        70
+      ]
+    }
+  ],
+  "events": [
+    {
+      "name": "CartCreated",
+      "discriminator": [
+        125,
+        96,
+        231,
+        239,
+        17,
+        235,
+        104,
+        84
+      ]
+    },
+    {
+      "name": "ProductCreated",
+      "discriminator": [
+        41,
+        64,
+        29,
+        113,
+        18,
+        124,
+        58,
+        82
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "InvalidPayment",
+      "msg": "Invalid Payment: Payment details are invalid.."
+    },
+    {
+      "code": 6001,
+      "name": "InsufficientFunds",
+      "msg": "InsufficientFunds: Not enough funds to complete the transaction."
+    },
+    {
+      "code": 6002,
+      "name": "AccountNotInitialized",
+      "msg": "AccountNotInitialized: The account has not been initialized."
+    },
+    {
+      "code": 6003,
+      "name": "AccountAlreadyInitialized",
+      "msg": "AccountAlreadyInitialized: The account is already initialized."
+    },
+    {
+      "code": 6004,
+      "name": "FundsNotFound",
+      "msg": "FundsNotFound: The specified DAO does not exist."
+    },
+    {
+      "code": 6005,
+      "name": "EscrowError",
+      "msg": "Invalid Payment: Payment details are invalid.."
+    },
+    {
+      "code": 6006,
+      "name": "DAONotActive",
+      "msg": "DAONotActive: The DAO is not active and cannot accept proposals or votes."
+    },
+    {
+      "code": 6007,
+      "name": "ProposalNotFound",
+      "msg": "ProposalNotFound: The specified proposal does not exist."
+    },
+    {
+      "code": 6008,
+      "name": "ProposalNotActive",
+      "msg": "ProposalNotActive: The proposal is not active and cannot be voted on."
+    },
+    {
+      "code": 6009,
+      "name": "ProposalAlreadyExecuted",
+      "msg": "ProposalAlreadyExecuted: The proposal has already been executed."
+    },
+    {
+      "code": 6010,
+      "name": "ProposalExpired",
+      "msg": "ProposalExpired: The proposal has expired and can no longer be voted on."
+    },
+    {
+      "code": 6011,
+      "name": "ProposalVotingThresholdNotMet",
+      "msg": "ProposalVotingThresholdNotMet: The proposal did not meet the required voting threshold."
+    },
+    {
+      "code": 6012,
+      "name": "ProposalAlreadyCanceled",
+      "msg": "ProposalAlreadyCanceled: The proposal has already been canceled."
+    },
+    {
+      "code": 6013,
+      "name": "ProposalNotCancelable",
+      "msg": "ProposalNotCancelable: The proposal cannot be canceled in its current state."
+    },
+    {
+      "code": 6014,
+      "name": "MemberNotFound",
+      "msg": "MemberNotFound: The specified member does not exist in the DAO."
+    },
+    {
+      "code": 6015,
+      "name": "MemberAlreadyExists",
+      "msg": "MemberAlreadyExists: The user is already a member of the DAO."
+    },
+    {
+      "code": 6016,
+      "name": "InsufficientStake",
+      "msg": "InsufficientStake: The user has not staked enough tokens to perform this action."
+    },
+    {
+      "code": 6017,
+      "name": "StakeLocked",
+      "msg": "StakeLocked: The staked tokens are locked and cannot be withdrawn yet."
+    },
+    {
+      "code": 6018,
+      "name": "TreasuryWithdrawalFailed",
+      "msg": "TreasuryWithdrawalFailed: The treasury withdrawal failed due to insufficient funds or invalid parameters."
+    },
+    {
+      "code": 6019,
+      "name": "TreasuryDepositFailed",
+      "msg": "TreasuryDepositFailed: The treasury deposit failed due to invalid parameters."
+    },
+    {
+      "code": 6020,
+      "name": "AlreadyVoted",
+      "msg": "AlreadyVoted: The user has already voted on this proposal."
+    },
+    {
+      "code": 6021,
+      "name": "VotingNotAllowed",
+      "msg": "VotingNotAllowed: The user is not allowed to vote on this proposal."
+    },
+    {
+      "code": 6022,
+      "name": "MemberNotActive",
+      "msg": "MemberNotActive: The user is not active."
+    },
+    {
+      "code": 6023,
+      "name": "CannotDelegateToSelf",
+      "msg": "Cannot delegate vote to self."
+    },
+    {
+      "code": 6024,
+      "name": "AlreadyDelegated",
+      "msg": "Vote has already been delegated."
+    },
+    {
+      "code": 6025,
+      "name": "InvalidOrganization",
+      "msg": "Member does not belong to this organization."
+    }
+  ],
+  "types": [
+    {
+      "name": "Cart",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "product_id",
+            "type": {
+              "array": [
+                "u8",
+                16
+              ]
+            }
+          },
+          {
+            "name": "product_name",
+            "type": "string"
+          },
+          {
+            "name": "quantity",
+            "type": "u64"
+          },
+          {
+            "name": "seller_pubkey",
+            "type": "pubkey"
+          },
+          {
+            "name": "product_imgurl",
+            "type": "string"
+          },
+          {
+            "name": "stock_status",
+            "type": {
+              "defined": {
+                "name": "anchor::states::cart::Stock"
+              }
+            }
+          },
+          {
+            "name": "amount",
+            "type": {
+              "vec": "u64"
+            }
+          },
+          {
+            "name": "cart_bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "CartCreated",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "seller",
+            "type": "pubkey"
+          },
+          {
+            "name": "quantity",
+            "type": "u64"
+          },
+          {
+            "name": "product_name",
+            "type": "string"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "CartList",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "cart_list",
+            "type": {
+              "vec": "pubkey"
+            }
+          },
+          {
+            "name": "total_amount",
+            "type": "u64"
+          },
+          {
+            "name": "cart_list_bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Category",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Electronics"
+          },
+          {
+            "name": "BeautyAndPersonalCare"
+          },
+          {
+            "name": "SnacksAndDrinks"
+          },
+          {
+            "name": "HouseholdEssentials"
+          },
+          {
+            "name": "GroceryAndKitchen"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Division",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Mobile"
+          },
+          {
+            "name": "Laptop"
+          },
+          {
+            "name": "Headphone"
+          },
+          {
+            "name": "SmartWatch"
+          },
+          {
+            "name": "ComputerPeripherals"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Escrow",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "buyer_pubkey",
+            "type": "pubkey"
+          },
+          {
+            "name": "seller_pubkey",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "release_fund",
+            "type": "bool"
+          },
+          {
+            "name": "time_stamp",
+            "type": "i64"
+          },
+          {
+            "name": "update_timestamp",
+            "type": "i64"
+          },
+          {
+            "name": "escrow_status",
+            "type": {
+              "defined": {
+                "name": "EscrowStatus"
+              }
+            }
+          },
+          {
+            "name": "escrow_bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "EscrowStatus",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "SwapPending"
+          },
+          {
+            "name": "FundsReceived"
+          },
+          {
+            "name": "SwapSuccess"
+          },
+          {
+            "name": "TransferFailed"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Order",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "order_id",
+            "type": {
+              "array": [
+                "u8",
+                16
+              ]
+            }
+          },
+          {
+            "name": "payment_id",
+            "type": "string"
+          },
+          {
+            "name": "tracking_id",
+            "type": {
+              "array": [
+                "u8",
+                16
+              ]
+            }
+          },
+          {
+            "name": "order_status",
+            "type": {
+              "defined": {
+                "name": "OrderStatus"
+              }
+            }
+          },
+          {
+            "name": "order_tracking",
+            "type": {
+              "defined": {
+                "name": "OrderTracking"
+              }
+            }
+          },
+          {
+            "name": "created_at",
+            "type": "i64"
+          },
+          {
+            "name": "updated_at",
+            "type": "i64"
+          },
+          {
+            "name": "order_bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "OrderStatus",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Pending"
+          },
+          {
+            "name": "Placed"
+          },
+          {
+            "name": "Failed"
+          },
+          {
+            "name": "Returned"
+          }
+        ]
+      }
+    },
+    {
+      "name": "OrderTracking",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "WatingForOrders"
+          },
+          {
+            "name": "Booked"
+          },
+          {
+            "name": "InTransit"
+          },
+          {
+            "name": "Shipped"
+          },
+          {
+            "name": "OutForDelivery"
+          },
+          {
+            "name": "Delivered"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Payment",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "payment_id",
+            "type": {
+              "array": [
+                "u8",
+                16
+              ]
+            }
+          },
+          {
+            "name": "payment_amount",
+            "type": "u64"
+          },
+          {
+            "name": "product_pubkey",
+            "type": "pubkey"
+          },
+          {
+            "name": "payment_method",
+            "type": {
+              "defined": {
+                "name": "PaymentMethod"
+              }
+            }
+          },
+          {
+            "name": "payment_status",
+            "type": {
+              "defined": {
+                "name": "PaymentStatus"
+              }
+            }
+          },
+          {
+            "name": "time_stamp",
+            "type": "i64"
+          },
+          {
+            "name": "tx_signature",
+            "type": {
+              "option": "string"
+            }
+          },
+          {
+            "name": "payment_bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "PaymentMethod",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "SOL"
+          },
+          {
+            "name": "ETH"
+          },
+          {
+            "name": "BTC"
+          },
+          {
+            "name": "USDT"
+          },
+          {
+            "name": "USDC"
+          }
+        ]
+      }
+    },
+    {
+      "name": "PaymentStatus",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Success"
+          },
+          {
+            "name": "Pending"
+          },
+          {
+            "name": "Failed"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Product",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "product_id",
+            "type": {
+              "array": [
+                "u8",
+                16
+              ]
+            }
+          },
+          {
+            "name": "product_name",
+            "type": "string"
+          },
+          {
+            "name": "category",
+            "type": {
+              "defined": {
+                "name": "Category"
+              }
+            }
+          },
+          {
+            "name": "division",
+            "type": {
+              "defined": {
+                "name": "Division"
+              }
+            }
+          },
+          {
+            "name": "quantity",
+            "type": "u32"
+          },
+          {
+            "name": "seller_pubkey",
+            "type": "pubkey"
+          },
+          {
+            "name": "seller_name",
+            "type": "string"
+          },
+          {
+            "name": "product_short_description",
+            "type": "string"
+          },
+          {
+            "name": "product_imgurl",
+            "type": "string"
+          },
+          {
+            "name": "price",
+            "type": "u32"
+          },
+          {
+            "name": "rating",
+            "type": "f32"
+          },
+          {
+            "name": "stock_status",
+            "type": {
+              "defined": {
+                "name": "anchor::states::product::Stock"
+              }
+            }
+          },
+          {
+            "name": "creation_bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ProductCreated",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "product_pubkey",
+            "type": "pubkey"
+          },
+          {
+            "name": "seller",
+            "type": "pubkey"
+          },
+          {
+            "name": "product_name",
+            "type": "string"
+          },
+          {
+            "name": "price",
+            "type": "u32"
+          },
+          {
+            "name": "category",
+            "type": {
+              "defined": {
+                "name": "Category"
+              }
+            }
+          },
+          {
+            "name": "division",
+            "type": {
+              "defined": {
+                "name": "Division"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "ProductsList",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "products",
+            "type": {
+              "vec": "pubkey"
+            }
+          },
+          {
+            "name": "product_list_bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "anchor::states::cart::Stock",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "OutOfStock"
+          },
+          {
+            "name": "InStock"
+          },
+          {
+            "name": "Restoring"
+          }
+        ]
+      }
+    },
+    {
+      "name": "anchor::states::product::Stock",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "OutOfStock"
+          },
+          {
+            "name": "InStock"
+          },
+          {
+            "name": "Restoring"
+          }
+        ]
+      }
+    }
+  ]
+}
