@@ -14,6 +14,7 @@ import {
   createMintToInstruction,
   createInitializeMintInstruction,
   getAccount,
+    ASSOCIATED_TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
 import IDL from "./IDL/ecom_dapp.json";
 import { EcomDapp } from "./IDL/ecom_dapp";
@@ -130,7 +131,8 @@ export class Escrow {
           mintKp.publicKey,
           9,
           walletAdapter.publicKey,
-          null
+          null,
+          TOKEN_PROGRAM_ID
         )
       );
 
@@ -154,40 +156,54 @@ export class Escrow {
       sellerAta = getAssociatedTokenAddressSync(mint, sellerPubkey);
       escrowAta = getAssociatedTokenAddressSync(mint, escrowPda, true);
 
-      //escrow ata creation
+      // 1) Create the mint on-chain first
+      // @ts-ignore
+      await safeSend(provider, createMintTx, [mintKp]);
+      // Wait for mint account to exist
+      await waitForAccount(provider.connection, mint);
+
+      // 2) Collect ATA creation instructions in a single transaction
+      const ataTx = new Transaction();
+
+      // Escrow ATA (PDA owner) — always attempt to create if missing
       try {
-        createAssociatedTokenAccountInstruction(
-          walletAdapter.publicKey,
-          escrowAta,
-          escrowPda,
-          mint
+        await getAccount(provider.connection, escrowAta);
+      } catch {
+        ataTx.add(
+          createAssociatedTokenAccountInstruction(
+            walletAdapter.publicKey, // payer
+            escrowAta,               // ata
+            escrowPda,               // owner (escrow PDA)
+            mint,                    // mint
+            TOKEN_PROGRAM_ID,
+            ASSOCIATED_TOKEN_PROGRAM_ID
+          )
         );
-      } catch (error) {
-        console.error((error as Error).message);
       }
-      const createAtaIfNeeded = async (ata: PublicKey, owner: PublicKey) => {
+
+      const addAtaIfMissing = async (ata: PublicKey, owner: PublicKey) => {
         try {
           await getAccount(provider.connection, ata);
           console.log(`ATA ${ata.toBase58()} already exists`);
         } catch (error: any) {
-          if (error.name === "TokenAccountNotFoundError") {
-            console.log(`Creating ATA ${ata.toBase58()}`);
+          console.log(`Creating ATA ${ata.toBase58()}`);
+          ataTx.add(
             createAssociatedTokenAccountInstruction(
-              walletAdapter.publicKey,
-              ata,
-              owner,
-              mint
-            );
-          } else {
-            throw error;
-          }
+              walletAdapter.publicKey, // payer
+              ata,                      // ata
+              owner,                    // owner
+              mint,                     // mint
+              TOKEN_PROGRAM_ID,
+              ASSOCIATED_TOKEN_PROGRAM_ID
+            )
+          );
         }
       };
 
-      await createAtaIfNeeded(userAta, walletAdapter.publicKey);
+      await addAtaIfMissing(userAta, walletAdapter.publicKey);
       console.log("User ATA: ", userAta.toBase58());
 
-      await createAtaIfNeeded(sellerAta, sellerPubkey);
+      await addAtaIfMissing(sellerAta, sellerPubkey);
       console.log("Seller ATA: ", sellerAta.toBase58());
 
       console.log("User Ata: ", userAta.toString());
@@ -205,14 +221,24 @@ export class Escrow {
         console.log("Seller Ata: Same as User Ata");
       }
 
+      // 3) Send ATA creations if any were added
+      if (ataTx.instructions.length > 0) {
+        // @ts-ignore
+        await safeSend(provider, ataTx, []);
+      }
+
+      // 4) Mint some tokens to the user ATA (example amount)
       const amount = new BN(200).mul(new BN(10 ** 9));
-      createMintToInstruction(
-        mint,
-        userAta,
-        walletAdapter.publicKey,
-        Number(amount),
-        []
+      const mintTx = new Transaction().add(
+        createMintToInstruction(
+          mint,
+          userAta,
+          walletAdapter.publicKey,
+          Number(amount)
+        )
       );
+      // @ts-ignore
+      await safeSend(provider, mintTx, []);
 
       async function safeSend(provider: AnchorProvider, tx: any, signers = []) {
         for (let i = 0; i < 3; i++) {
@@ -233,10 +259,7 @@ export class Escrow {
         throw new Error("Failed after multiple retries");
       }
 
-      // @ts-ignore
-      await safeSend(provider, createMintTx, [mintKp]);
-      // await provider.sendAndConfirm(createMintTx, [mintKp]);
-      await waitForAccount(connection, userAta);
+      // (moved mint creation earlier)
 
       return {
         success: true,
