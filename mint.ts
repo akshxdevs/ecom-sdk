@@ -492,4 +492,68 @@ export class Escrow {
       }
     }
   }
+
+  async initEscrowWithdraw(
+    productId: number,
+    walletAdapter:AnchorWallet,
+    seller:PublicKey,
+  ) {
+    if (!walletAdapter) {
+      new Error("Wallet not connected..");
+    }
+    try {
+
+      if (!this.paymentPda)  {
+        console.log("payment pda missing...");
+      };
+      if (!this.paymentPda) {
+        console.log("escrow pda missing...");
+      };    
+      console.log("---WITHDRAW ESCROW---");
+      await this.program.methods.withdrawEscrow(
+        productId
+      ).accounts({
+        owner:walletAdapter.publicKey,
+        escrow:this.escrowPda,
+        payment:this.paymentPda,
+        escrowAta:this.escrowAta,
+        buyerAta:this.buyerAta,
+        sellerAta:this.sellerAta,
+        userAta:this.userAta,
+        tokenProgram:TOKEN_PROGRAM_ID,
+        systemProgram:SystemProgram.programId
+      }as any).rpc({
+        skipPreflight:false,
+        preflightCommitment:"confirmed",
+        commitment:"confirmed"
+      })
+      
+
+      async function accountFetch(connection:any,escrowAta:PublicKey,escrowPda:PublicKey,sellerAta:PublicKey,retries = 10) {
+        for (let i=0; i<retries; i++){
+          const sellerBal = await connection.getTokenAccountBalance(sellerAta);
+          const escrowBal = await connection.getTokenAccountBalance(escrowAta);
+            
+          const escrowSOL = escrowBal.value.amount ;
+          const sellerSOL = sellerBal.value.amount;
+            
+          console.log("Account Balances:");
+          console.log(`Escrow (${escrowPda.toString()}): ${escrowSOL} SOL`);
+          console.log(`Seller (${seller.toString()}): ${sellerSOL} SOL`);
+        }
+      }
+
+      await accountFetch(this.provider.connection,this.escrowAta,this.escrowPda,this.sellerAta);
+
+      return{
+        success:true,
+        escrowPda:this.escrowPda,
+      }
+    } catch (error) {
+      return{
+        sucess:false,
+        error:(error as Error).message
+      }
+    }
+  }
 }
