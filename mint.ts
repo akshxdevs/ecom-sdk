@@ -49,11 +49,27 @@ export class Escrow {
   private provider: anchor.AnchorProvider;
   private program: anchor.Program<EcomDapp>;
   private connection: Connection;
+
+
+    private mint: anchor.web3.PublicKey;
+    private escrowAta: anchor.web3.PublicKey;
+    private sellerAta: anchor.web3.PublicKey;
+    private buyerAta: anchor.web3.PublicKey;
+    private userAta: anchor.web3.PublicKey;
+    private escrowPda: anchor.web3.PublicKey;
+    private paymentPda: anchor.web3.PublicKey;
   constructor(walletAdapter: any) {
     this.provider = createProvider(walletAdapter);
     anchor.setProvider(this.provider);
     this.program = new anchor.Program<EcomDapp>(IDL as EcomDapp, this.provider);
     this.connection = connection;
+    this.mint = anchor.web3.PublicKey.default;
+    this.escrowAta = anchor.web3.PublicKey.default;
+    this.sellerAta = anchor.web3.PublicKey.default;
+    this.buyerAta = anchor.web3.PublicKey.default;
+    this.userAta = anchor.web3.PublicKey.default;
+    this.escrowPda = anchor.web3.PublicKey.default;
+    this.paymentPda = anchor.web3.PublicKey.default;
   }
   async initMint(
     walletAdapter: AnchorWallet,
@@ -78,12 +94,6 @@ export class Escrow {
       buyer pubkey: ${buyerPubkey.toBase58()}
       walletAdapter: ${walletAdapter}
     `);
-
-    let mint: anchor.web3.PublicKey;
-    let escrowAta: anchor.web3.PublicKey;
-    let sellerAta: anchor.web3.PublicKey;
-    let buyerAta: anchor.web3.PublicKey;
-    let userAta: anchor.web3.PublicKey;
 
     if (!walletAdapter || !walletAdapter.publicKey) {
       throw new Error("Wallet not connected or publicKey not available!");
@@ -118,8 +128,8 @@ export class Escrow {
     try {
       const mintKp = anchor.web3.Keypair.generate();
       const lamports = await provider.connection.getMinimumBalanceForRentExemption(82);
-
-      const createMintTx = new Transaction().add(
+      const blockhash = await connection.getLatestBlockhash("finalized");
+      const createMintTx = new Transaction({recentBlockhash:blockhash.blockhash}).add(
         SystemProgram.createAccount({
           fromPubkey: walletAdapter.publicKey,
           newAccountPubkey: mintKp.publicKey,
@@ -142,39 +152,36 @@ export class Escrow {
       createMintTx.feePayer = walletAdapter.publicKey;
       createMintTx.sign(mintKp);
 
-      mint = mintKp.publicKey;
-      console.log("Mint Address: ", mint.toBase58());
+      this.mint = mintKp.publicKey;
+      console.log("Mint Address: ", this.mint.toBase58());
 
-      const [escrowPda] = PublicKey.findProgramAddressSync(
+      [this.escrowPda] = PublicKey.findProgramAddressSync(
         [Buffer.from("escrow"), walletAdapter.publicKey.toBuffer()],
         new PublicKey(ECOM_PROGRAM_ID)
       );
-      console.log("escrowPda", escrowPda.toBase58());
+      console.log("escrowPda", this.escrowPda.toBase58());
 
-      userAta = getAssociatedTokenAddressSync(mint, walletAdapter.publicKey);
-      buyerAta = getAssociatedTokenAddressSync(mint, buyerPubkey);
-      sellerAta = getAssociatedTokenAddressSync(mint, sellerPubkey);
-      escrowAta = getAssociatedTokenAddressSync(mint, escrowPda, true);
+      this.userAta = getAssociatedTokenAddressSync(this.mint, walletAdapter.publicKey);
+      this.buyerAta = getAssociatedTokenAddressSync(this.mint, buyerPubkey);
+      this.sellerAta = getAssociatedTokenAddressSync(this.mint, sellerPubkey);
+      this.escrowAta = getAssociatedTokenAddressSync(this.mint, this.escrowPda, true);
 
-      // 1) Create the mint on-chain first
       // @ts-ignore
       await safeSend(provider, createMintTx, [mintKp]);
-      // Wait for mint account to exist
-      await waitForAccount(provider.connection, mint);
+      await waitForAccount(provider.connection, this.mint);
 
-      // 2) Collect ATA creation instructions in a single transaction
-      const ataTx = new Transaction();
+      const newBlockHash = await connection.getLatestBlockhash("finalized");
+      const ataTx = new Transaction({recentBlockhash:newBlockHash.blockhash});
 
-      // Escrow ATA (PDA owner) — always attempt to create if missing
       try {
-        await getAccount(provider.connection, escrowAta);
+        await getAccount(provider.connection, this.escrowAta);
       } catch {
         ataTx.add(
           createAssociatedTokenAccountInstruction(
-            walletAdapter.publicKey, // payer
-            escrowAta,               // ata
-            escrowPda,               // owner (escrow PDA)
-            mint,                    // mint
+            walletAdapter.publicKey, 
+            this.escrowAta,               
+            this.escrowPda,               
+            this.mint,                   
             TOKEN_PROGRAM_ID,
             ASSOCIATED_TOKEN_PROGRAM_ID
           )
@@ -189,10 +196,10 @@ export class Escrow {
           console.log(`Creating ATA ${ata.toBase58()}`);
           ataTx.add(
             createAssociatedTokenAccountInstruction(
-              walletAdapter.publicKey, // payer
-              ata,                      // ata
-              owner,                    // owner
-              mint,                     // mint
+              walletAdapter.publicKey, 
+              ata,                      
+              owner,                    
+              this.mint,                    
               TOKEN_PROGRAM_ID,
               ASSOCIATED_TOKEN_PROGRAM_ID
             )
@@ -200,39 +207,38 @@ export class Escrow {
         }
       };
 
-      await addAtaIfMissing(userAta, walletAdapter.publicKey);
-      console.log("User ATA: ", userAta.toBase58());
+      await addAtaIfMissing(this.userAta, walletAdapter.publicKey);
+      console.log("User ATA: ", this.userAta.toBase58());
 
-      await addAtaIfMissing(sellerAta, sellerPubkey);
-      console.log("Seller ATA: ", sellerAta.toBase58());
+      await addAtaIfMissing(this.sellerAta, sellerPubkey);
+      console.log("Seller ATA: ", this.sellerAta.toBase58());
 
-      console.log("User Ata: ", userAta.toString());
-      console.log("Escrow Ata (derived): ", escrowAta.toString());
+      console.log("User Ata: ", this.userAta.toString());
+      console.log("Escrow Ata (derived): ", this.escrowAta.toString());
 
       if (!buyerPubkey.equals(walletAdapter.publicKey)) {
-        console.log("Buyer Ata: ", buyerAta.toString());
+        console.log("Buyer Ata: ", this.buyerAta.toString());
       } else {
         console.log("Buyer Ata: Same as User Ata");
       }
 
       if (!sellerPubkey.equals(walletAdapter.publicKey)) {
-        console.log("Seller Ata: ", sellerAta.toString());
+        console.log("Seller Ata: ", this.sellerAta.toString());
       } else {
         console.log("Seller Ata: Same as User Ata");
       }
 
-      // 3) Send ATA creations if any were added
       if (ataTx.instructions.length > 0) {
         // @ts-ignore
         await safeSend(provider, ataTx, []);
       }
 
-      // 4) Mint some tokens to the user ATA (example amount)
       const amount = new BN(200).mul(new BN(10 ** 9));
-      const mintTx = new Transaction().add(
+      const latestBlockhash = await connection.getLatestBlockhash("finalized");
+      const mintTx = new Transaction({recentBlockhash:latestBlockhash.blockhash}).add(
         createMintToInstruction(
-          mint,
-          userAta,
+          this.mint,
+          this.userAta,
           walletAdapter.publicKey,
           Number(amount)
         )
@@ -259,51 +265,47 @@ export class Escrow {
         throw new Error("Failed after multiple retries");
       }
 
-      // (moved mint creation earlier)
-
       return {
         success: true,
-        mint: mint.toBase58(),
-        escrowPda: escrowPda.toBase58(),
-        userAta: userAta.toBase58(),
-        buyerAta: buyerAta.toBase58(),
-        sellerAta: sellerAta.toBase58(),
-        escrowAta: escrowAta.toBase58(),
+        mint: this.mint.toBase58(),
+        escrowPda: this.escrowPda.toBase58(),
+        userAta: this.userAta.toBase58(),
+        buyerAta: this.buyerAta.toBase58(),
+        sellerAta: this.sellerAta.toBase58(),
+        escrowAta: this.escrowAta.toBase58(),
       };
-    } catch (error: any) {
-      console.error("Failed to create mint:", error);
+    }catch (error) {
+      console.error("Something went wrong...", error);
       return {
         success: false,
-        error: error.message,
+        error: (error as Error).message,
       };
     }
   }
-  async initCreatePayment(walletAdapter: AnchorWallet, totalAmount: number) {
+  async initPayment(walletAdapter: AnchorWallet, totalAmount: number) {
     try {
-      const [paymentPda] = PublicKey.findProgramAddressSync(
+      [this.paymentPda] = PublicKey.findProgramAddressSync(
         [Buffer.from("payment"), walletAdapter.publicKey.toBuffer()],
         new PublicKey(ECOM_PROGRAM_ID)
       );
 
       try {
-        const existingAccount = await this.provider.connection.getAccountInfo(
-          paymentPda
-        );
+        const existingAccount = await this.provider.connection.getAccountInfo(this.paymentPda);
         if (existingAccount) {
-          console.log("Payment account already exists, skipping creation");
+          console.log("Payment account already exists, skipping creation");          
           return {
             success: true,
             transaction: "Account already exists",
-            payment: paymentPda.toString(),
+            payment: this.paymentPda.toString(),
           };
         }
       } catch (checkError) {}
 
       const tx = await this.program.methods
-        .createPayment(new BN(totalAmount), paymentPda, null)
+        .createPayment(new BN(totalAmount), this.paymentPda, null)
         .accounts({
           signer: walletAdapter.publicKey,
-          payment: paymentPda,
+          payment: this.paymentPda,
           system_program: SystemProgram.programId,
         } as any)
         .rpc({
@@ -314,7 +316,7 @@ export class Escrow {
       return {
         success: true,
         transaction: tx,
-        payment: paymentPda.toString(),
+        payment: this.paymentPda.toString(),
       };
     } catch (error) {
       console.error("Something went wrong...", error);
@@ -324,26 +326,4 @@ export class Escrow {
       };
     }
   }
-  async initEscrow(
-    walletAdapter: AnchorWallet,
-    buyerPubkey: PublicKey,
-    seller: PublicKey
-  ) {
-    const provider = createProvider(walletAdapter);
-    anchor.setProvider(provider);
-
-    if (!walletAdapter) {
-      new Error("Wallet not connected..");
-    }
-    if (!buyerPubkey && !seller) {
-      new Error("Buyer or Seller pubkey missing..");
-    }
-
-    console.log("SDK");
-    console.log("Wallet");
-  }
-
-  async initEscrowDeposite(productId: string) {}
-
-  async initEscrowwithdraw(productId: string) {}
 }
