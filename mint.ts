@@ -428,4 +428,68 @@ export class Escrow {
     }
   }
 
+  async initEscrowDeposite(
+    productId: number,
+    walletAdapter:AnchorWallet,
+  ) {
+
+    if (!walletAdapter) {
+      new Error("Wallet not connected..");
+    }
+
+    try {
+      if (!this.paymentPda)  {
+        console.log("payment pda missing...");
+      };
+      if (!this.escrowPda) {
+        console.log("escrow pda missing...");
+      };
+      console.log("----DEPOSITE ESCROW----");
+      await this.program.methods.depositEscrow(
+        productId
+      ).accounts({
+        owner:walletAdapter.publicKey,
+        escrow:this.escrowPda,
+        payment:this.paymentPda,
+        escrowAta:this.escrowAta,
+        buyerAta:this.buyerAta,
+        sellerAta:this.sellerAta,
+        userAta:this.userAta,
+        tokenProgram:TOKEN_PROGRAM_ID,
+        systemProgram:SystemProgram.programId
+      }as any).rpc({
+        skipPreflight:false,
+        preflightCommitment:"confirmed",
+        commitment:"confirmed"
+      })
+
+      async function accountFetch(connection:any,escrowAta:PublicKey,escrowPda:PublicKey,userAta:PublicKey,retries = 10) {
+        for (let i=0; i<retries; i++){
+          const userBal = await connection.getTokenAccountBalance(userAta);
+          const escrowBal = await connection.getTokenAccountBalance(escrowAta);
+            
+          const userSOL = userBal.value.amount; 
+          const escrowSOL = escrowBal.value.amount ;
+            
+          console.log("Account Balances:");
+          console.log(`Buyer (${walletAdapter.publicKey.toString()}): ${userSOL} SOL`);
+          console.log(`Escrow (${escrowPda.toString()}): ${escrowSOL} SOL`);
+        }
+      }
+
+      await accountFetch(this.provider.connection,this.escrowAta,this.escrowPda,this.userAta);
+
+    
+      return{
+        success:true,
+        data:this.escrowPda
+      }
+    
+    } catch (error) {
+      return{
+        sucess:false,
+        error:(error as Error).message
+      }
+    }
+  }
 }
