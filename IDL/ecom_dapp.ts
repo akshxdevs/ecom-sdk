@@ -115,6 +115,51 @@ export type EcomDapp = {
       ]
     },
     {
+      "name": "closePayment",
+      "discriminator": [
+        172,
+        106,
+        77,
+        250,
+        247,
+        169,
+        156,
+        178
+      ],
+      "accounts": [
+        {
+          "name": "signer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "payments",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  97,
+                  121,
+                  109,
+                  101,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "signer"
+              }
+            ]
+          }
+        }
+      ],
+      "args": []
+    },
+    {
       "name": "createEscrow",
       "discriminator": [
         253,
@@ -552,6 +597,54 @@ export type EcomDapp = {
       ]
     },
     {
+      "name": "updateOrder",
+      "discriminator": [
+        54,
+        8,
+        208,
+        207,
+        34,
+        134,
+        239,
+        168
+      ],
+      "accounts": [
+        {
+          "name": "signer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "order",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  111,
+                  114,
+                  100,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "signer"
+              }
+            ]
+          }
+        }
+      ],
+      "args": [
+        {
+          "name": "orderstatusStr",
+          "type": "string"
+        }
+      ]
+    },
+    {
       "name": "withdrawEscrow",
       "discriminator": [
         81,
@@ -778,126 +871,131 @@ export type EcomDapp = {
     },
     {
       "code": 6001,
+      "name": "unexpectedError",
+      "msg": "Something went wrong / Not found!"
+    },
+    {
+      "code": 6002,
       "name": "insufficientFunds",
       "msg": "InsufficientFunds: Not enough funds to complete the transaction."
     },
     {
-      "code": 6002,
+      "code": 6003,
       "name": "accountNotInitialized",
       "msg": "AccountNotInitialized: The account has not been initialized."
     },
     {
-      "code": 6003,
+      "code": 6004,
       "name": "accountAlreadyInitialized",
       "msg": "AccountAlreadyInitialized: The account is already initialized."
     },
     {
-      "code": 6004,
+      "code": 6005,
       "name": "fundsNotFound",
       "msg": "FundsNotFound: The specified DAO does not exist."
     },
     {
-      "code": 6005,
+      "code": 6006,
       "name": "escrowError",
       "msg": "Invalid Payment: Payment details are invalid.."
     },
     {
-      "code": 6006,
+      "code": 6007,
       "name": "daoNotActive",
       "msg": "DAONotActive: The DAO is not active and cannot accept proposals or votes."
     },
     {
-      "code": 6007,
+      "code": 6008,
       "name": "proposalNotFound",
       "msg": "ProposalNotFound: The specified proposal does not exist."
     },
     {
-      "code": 6008,
+      "code": 6009,
       "name": "proposalNotActive",
       "msg": "ProposalNotActive: The proposal is not active and cannot be voted on."
     },
     {
-      "code": 6009,
+      "code": 6010,
       "name": "proposalAlreadyExecuted",
       "msg": "ProposalAlreadyExecuted: The proposal has already been executed."
     },
     {
-      "code": 6010,
+      "code": 6011,
       "name": "proposalExpired",
       "msg": "ProposalExpired: The proposal has expired and can no longer be voted on."
     },
     {
-      "code": 6011,
+      "code": 6012,
       "name": "proposalVotingThresholdNotMet",
       "msg": "ProposalVotingThresholdNotMet: The proposal did not meet the required voting threshold."
     },
     {
-      "code": 6012,
+      "code": 6013,
       "name": "proposalAlreadyCanceled",
       "msg": "ProposalAlreadyCanceled: The proposal has already been canceled."
     },
     {
-      "code": 6013,
+      "code": 6014,
       "name": "proposalNotCancelable",
       "msg": "ProposalNotCancelable: The proposal cannot be canceled in its current state."
     },
     {
-      "code": 6014,
+      "code": 6015,
       "name": "memberNotFound",
       "msg": "MemberNotFound: The specified member does not exist in the DAO."
     },
     {
-      "code": 6015,
+      "code": 6016,
       "name": "memberAlreadyExists",
       "msg": "MemberAlreadyExists: The user is already a member of the DAO."
     },
     {
-      "code": 6016,
+      "code": 6017,
       "name": "insufficientStake",
       "msg": "InsufficientStake: The user has not staked enough tokens to perform this action."
     },
     {
-      "code": 6017,
+      "code": 6018,
       "name": "stakeLocked",
       "msg": "StakeLocked: The staked tokens are locked and cannot be withdrawn yet."
     },
     {
-      "code": 6018,
+      "code": 6019,
       "name": "treasuryWithdrawalFailed",
       "msg": "TreasuryWithdrawalFailed: The treasury withdrawal failed due to insufficient funds or invalid parameters."
     },
     {
-      "code": 6019,
+      "code": 6020,
       "name": "treasuryDepositFailed",
       "msg": "TreasuryDepositFailed: The treasury deposit failed due to invalid parameters."
     },
     {
-      "code": 6020,
+      "code": 6021,
       "name": "alreadyVoted",
       "msg": "AlreadyVoted: The user has already voted on this proposal."
     },
     {
-      "code": 6021,
+      "code": 6022,
       "name": "votingNotAllowed",
       "msg": "VotingNotAllowed: The user is not allowed to vote on this proposal."
     },
     {
-      "code": 6022,
+      "code": 6023,
       "name": "memberNotActive",
       "msg": "MemberNotActive: The user is not active."
     },
     {
-      "code": 6023,
+      "code": 6024,
       "name": "cannotDelegateToSelf",
       "msg": "Cannot delegate vote to self."
     },
     {
-      "code": 6024,
+      "code": 6025,
       "name": "alreadyDelegated",
       "msg": "Vote has already been delegated."
     },
     {
-      "code": 6025,
+      "code": 6026,
       "name": "invalidOrganization",
       "msg": "Member does not belong to this organization."
     }
