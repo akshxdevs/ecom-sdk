@@ -532,6 +532,9 @@ export class Escrow {
         [Buffer.from("payment"), owner.toBuffer()],
         new PublicKey(ECOM_PROGRAM_ID)
       );
+
+      this.paymentPda = paymentPda;
+
       const userAta = getAssociatedTokenAddressSync(mint, owner);
       const buyerAta = getAssociatedTokenAddressSync(mint, owner);
       const sellerAta = getAssociatedTokenAddressSync(mint, seller);
@@ -590,15 +593,19 @@ export class Escrow {
     }
     const [orderPda] = PublicKey.findProgramAddressSync(
       [Buffer.from("order"),walletAdapter.publicKey.toBuffer()],
-      this.program.programId
+      new PublicKey(ECOM_PROGRAM_ID)
     );
-    const payment_id = (await this.program.account.payment.fetch(this.paymentPda)).paymentId;
+    console.log("Order PDA: ",orderPda.toBase58());
+    
+    const payment = (await this.program.account.payment.fetch(this.paymentPda));
+    console.log("Payment Details: ",payment);
+    
     const existingOrder = await this.program.account.order.fetch(orderPda);
-    console.log("Order details: ",existingOrder);
+    console.log("Existing Order Details: ",existingOrder);
     console.log("Order ID: ", bytesToUuid(existingOrder.orderId));
     console.log("Order Status: ",existingOrder.orderStatus);
     console.log("Order Tracking: ",existingOrder.orderTracking);
-    if (existingOrder){
+    if (existingOrder && orderPda){
       return{
         success:true,
         order:orderPda
@@ -606,7 +613,7 @@ export class Escrow {
     }
     try {
         await this.program.methods.createOrder(
-          String(bytesToUuid(payment_id))
+          String(bytesToUuid(payment.paymentId))
         ).accounts({
           signer:walletAdapter.publicKey,
           orderPda:orderPda,
@@ -626,20 +633,20 @@ export class Escrow {
       return{
         success:false,
         error:(error as Error).message
-      }
+      };
     }
   }
-  async closePayment(walletAdapter:AnchorWallet){
+  async closePayment(walletAdapter:AnchorWallet,paymentPda:PublicKey){
     console.log(`Deleting Account Pda ${this.paymentPda} of ${walletAdapter.toString()}`);
     try {
       await this.program.methods.closePayment().accounts({
         signer: walletAdapter.publicKey,
-        payments: this.paymentPda,
+        payments: paymentPda,
       }as any).rpc();
-      console.log("Account Close Successfully...");
+      console.log(`Account -> ${paymentPda} Closed Successfully...`);
       return{
         success:true,
-        closedAccountPda:this.paymentPda
+        closedAccountPda:paymentPda
       };
     } catch (error) {
       return{
@@ -647,6 +654,5 @@ export class Escrow {
         error:(error as Error).message
       };
     }
-
   }
 }
