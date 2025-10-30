@@ -21,6 +21,7 @@ import { EcomDapp } from "./IDL/ecom_dapp";
 import { AnchorProvider } from "@coral-xyz/anchor";
 import { AnchorWallet } from "@solana/wallet-adapter-react";
 import React, { Provider } from "react";
+import bytesToUuid from "@/app/utils/uuidConverter";
 
 const local = "http://127.0.0.1:8899";
 const devnet = "https://api.devnet.solana.com";
@@ -581,5 +582,71 @@ export class Escrow {
         error:(error as Error).message
       }
     }
+  }
+  async initOrder(walletAdapter:AnchorWallet){
+
+    if (!walletAdapter) {
+      new Error("Wallet not connected..");
+    }
+    const [orderPda] = PublicKey.findProgramAddressSync(
+      [Buffer.from("order"),walletAdapter.publicKey.toBuffer()],
+      this.program.programId
+    );
+    const payment_id = (await this.program.account.payment.fetch(this.paymentPda)).paymentId;
+    const existingOrder = await this.program.account.order.fetch(orderPda);
+    console.log("Order details: ",existingOrder);
+    console.log("Order ID: ", bytesToUuid(existingOrder.orderId));
+    console.log("Order Status: ",existingOrder.orderStatus);
+    console.log("Order Tracking: ",existingOrder.orderTracking);
+    if (existingOrder){
+      return{
+        success:true,
+        order:orderPda
+      };
+    }
+    try {
+        await this.program.methods.createOrder(
+          String(bytesToUuid(payment_id))
+        ).accounts({
+          signer:walletAdapter.publicKey,
+          orderPda:orderPda,
+          paymentPda:this.paymentPda,
+          systemProgram:SystemProgram.programId
+        }as any).rpc({
+          skipPreflight:false,
+          commitment:"confirmed",
+          preflightCommitment:"confirmed"
+        });
+        return{
+          success:true,
+          order:orderPda,
+          payment:this.paymentPda
+        }
+    } catch (error) {
+      return{
+        success:false,
+        error:(error as Error).message
+      }
+    }
+  }
+  async closePayment(walletAdapter:AnchorWallet){
+    console.log(`Deleting Account Pda ${this.paymentPda} of ${walletAdapter.toString()}`);
+    try {
+      await this.program.methods.closePayment().accounts({
+        signer: walletAdapter.publicKey,
+        payments: this.paymentPda,
+      }as any).rpc();
+      console.log("Account Close Successfully...");
+      return{
+        success:true,
+        closedAccountPda:this.paymentPda
+      };
+    } catch (error) {
+      return{
+        success:false,
+        error:(error as Error).message
+      };
+    }
+
   }
 }
