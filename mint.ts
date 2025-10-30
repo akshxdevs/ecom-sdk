@@ -343,21 +343,21 @@ export class Escrow {
       const existingAccount = await this.provider.connection.getAccountInfo(this.escrowPda);
         if (existingAccount) {
           console.log("Escrow account already exists, skipping creation");
-          async function accountFetch(connection:any,escrowAta:PublicKey,escrowPda:PublicKey,userAta:PublicKey,retries = 10) {
-            for (let i=0; i<retries; i++){
-              const userBal = await connection.getTokenAccountBalance(userAta);
-              const escrowBal = await connection.getTokenAccountBalance(escrowAta);
+          // async function accountFetch(connection:any,escrowAta:PublicKey,escrowPda:PublicKey,userAta:PublicKey,retries = 10) {
+          //   for (let i=0; i<retries; i++){
+          //     const userBal = await connection.getTokenAccountBalance(userAta);
+          //     const escrowBal = await connection.getTokenAccountBalance(escrowAta);
                 
-              const userSOL = userBal.value.amount; 
-              const escrowSOL = escrowBal.value.amount ;
+          //     const userSOL = userBal.value.amount; 
+          //     const escrowSOL = escrowBal.value.amount ;
                 
-              console.log("Account Balances:");
-              console.log(`Buyer (${walletAdapter.publicKey.toString()}): ${userSOL} SOL`);
-              console.log(`Escrow (${escrowPda.toString()}): ${escrowSOL} SOL`);
-            }
-          }
+          //     console.log("Account Balances:");
+          //     console.log(`Buyer (${walletAdapter.publicKey.toString()}): ${userSOL} SOL`);
+          //     console.log(`Escrow (${escrowPda.toString()}): ${escrowSOL} SOL`);
+          //   }
+          // }
 
-          await accountFetch(this.provider.connection,this.escrowAta,this.escrowPda,this.userAta);
+          // await accountFetch(this.provider.connection,this.escrowAta,this.escrowPda,this.userAta);
 
           return {
             success: true,
@@ -369,10 +369,10 @@ export class Escrow {
 
     try {
 
-      if (this.paymentPda)  {
+      if (!this.paymentPda)  {
         console.log("payment pda missing...");
       };
-      if (this.escrowPda) {
+      if (!this.escrowPda) {
         console.log("escrow pda missing...");
       };
 
@@ -398,23 +398,21 @@ export class Escrow {
         commitment:"confirmed"
       })
       
-      async function accountFetch(connection:any,escrowAta:PublicKey,escrowPda:PublicKey,userAta:PublicKey,retries = 10) {
-        for (let i=0; i<retries; i++){
-          const userBal = await connection.getTokenAccountBalance(userAta);
-          const escrowBal = await connection.getTokenAccountBalance(escrowAta);
+      // async function accountFetch(connection:any,escrowAta:PublicKey,escrowPda:PublicKey,userAta:PublicKey,retries = 10) {
+      //   for (let i=0; i<retries; i++){
+      //     const userBal = await connection.getTokenAccountBalance(userAta);
+      //     const escrowBal = await connection.getTokenAccountBalance(escrowAta);
             
-          const userSOL = userBal.value.amount; 
-          const escrowSOL = escrowBal.value.amount ;
+      //     const userSOL = userBal.value.amount; 
+      //     const escrowSOL = escrowBal.value.amount ;
             
-          console.log("Account Balances:");
-          console.log(`Buyer (${walletAdapter.publicKey.toString()}): ${userSOL} SOL`);
-          console.log(`Escrow (${escrowPda.toString()}): ${escrowSOL} SOL`);
-        }
-      }
+      //     console.log("Account Balances:");
+      //     console.log(`Buyer (${walletAdapter.publicKey.toString()}): ${userSOL} SOL`);
+      //     console.log(`Escrow (${escrowPda.toString()}): ${escrowSOL} SOL`);
+      //   }
+      // }
 
-      await accountFetch(this.provider.connection,this.escrowAta,this.escrowPda,this.userAta);
-
-    
+      // await accountFetch(this.provider.connection,this.escrowAta,this.escrowPda,this.userAta);
 
       return{
         success:true,
@@ -463,21 +461,21 @@ export class Escrow {
         commitment:"confirmed"
       })
 
-      async function accountFetch(connection:any,escrowAta:PublicKey,escrowPda:PublicKey,userAta:PublicKey,retries = 10) {
-        for (let i=0; i<retries; i++){
-          const userBal = await connection.getTokenAccountBalance(userAta);
-          const escrowBal = await connection.getTokenAccountBalance(escrowAta);
+      // async function accountFetch(connection:any,escrowAta:PublicKey,escrowPda:PublicKey,userAta:PublicKey,retries = 10) {
+      //   for (let i=0; i<retries; i++){
+      //     const userBal = await connection.getTokenAccountBalance(userAta);
+      //     const escrowBal = await connection.getTokenAccountBalance(escrowAta);
             
-          const userSOL = userBal.value.amount; 
-          const escrowSOL = escrowBal.value.amount ;
+      //     const userSOL = userBal.value.amount; 
+      //     const escrowSOL = escrowBal.value.amount ;
             
-          console.log("Account Balances:");
-          console.log(`Buyer (${walletAdapter.publicKey.toString()}): ${userSOL} SOL`);
-          console.log(`Escrow (${escrowPda.toString()}): ${escrowSOL} SOL`);
-        }
-      }
+      //     console.log("Account Balances:");
+      //     console.log(`Buyer (${walletAdapter.publicKey.toString()}): ${userSOL} SOL`);
+      //     console.log(`Escrow (${escrowPda.toString()}): ${escrowSOL} SOL`);
+      //   }
+      // }
 
-      await accountFetch(this.provider.connection,this.escrowAta,this.escrowPda,this.userAta);
+      // await accountFetch(this.provider.connection,this.escrowAta,this.escrowPda,this.userAta);
 
     
       return{
@@ -521,7 +519,7 @@ export class Escrow {
         sellerAta:this.sellerAta,
         userAta:this.userAta,
         tokenProgram:TOKEN_PROGRAM_ID,
-        systemProgram:SystemProgram.programId
+        systemProgram:anchor.web3.SystemProgram.programId
       }as any).rpc({
         skipPreflight:false,
         preflightCommitment:"confirmed",
