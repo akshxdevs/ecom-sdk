@@ -95,7 +95,7 @@ export class Escrow {
       buyer pubkey: ${buyerPubkey.toBase58()}
       walletAdapter: ${walletAdapter}
     `);
-
+    
     if (!walletAdapter || !walletAdapter.publicKey) {
       throw new Error("Wallet not connected or publicKey not available!");
     }
@@ -292,8 +292,11 @@ export class Escrow {
 
       try {
         const existingAccount = await this.provider.connection.getAccountInfo(this.paymentPda);
+        const paymentDetails = await this.program.account.payment.fetch(this.paymentPda);
+        console.log("Payment Details: ",paymentDetails);
+        
         if (existingAccount) {
-          console.log("Payment account already exists, skipping creation");          
+          console.log("Payment account already exists, skipping creation",existingAccount);          
           return {
             success: true,
             transaction: "Account already exists",
@@ -314,6 +317,9 @@ export class Escrow {
           preflightCommitment: "confirmed",
           commitment: "confirmed",
         });
+        const newPaymentAccount = await this.provider.connection.getAccountInfo(this.paymentPda);
+        console.log("New payment intialized: ",newPaymentAccount);
+        
       return {
         success: true,
         transaction: tx,
@@ -352,6 +358,11 @@ export class Escrow {
         new PublicKey(ECOM_PROGRAM_ID)
       );
 
+      const payment = (await this.program.account.payment.fetch(paymentPda));
+      console.log("Payment Details: ",payment);
+      console.log("Payment method: ",payment.paymentMethod);
+      console.log("Payment Status: ",payment.paymentStatus)
+
       const userAta = getAssociatedTokenAddressSync(mint, owner);
       const buyerAta = getAssociatedTokenAddressSync(mint, buyerPubkey);
       const sellerAta = getAssociatedTokenAddressSync(mint, seller);
@@ -360,22 +371,10 @@ export class Escrow {
       const existingAccount = await this.provider.connection.getAccountInfo(escrowPda);
         if (existingAccount) {
           console.log("Escrow account already exists, skipping creation");
-          // async function accountFetch(connection:any,escrowAta:PublicKey,escrowPda:PublicKey,userAta:PublicKey,retries = 10) {
-          //   for (let i=0; i<retries; i++){
-          //     const userBal = await connection.getTokenAccountBalance(userAta);
-          //     const escrowBal = await connection.getTokenAccountBalance(escrowAta);
-                
-          //     const userSOL = userBal.value.amount; 
-          //     const escrowSOL = escrowBal.value.amount ;
-                
-          //     console.log("Account Balances:");
-          //     console.log(`Buyer (${walletAdapter.publicKey.toString()}): ${userSOL} SOL`);
-          //     console.log(`Escrow (${escrowPda.toString()}): ${escrowSOL} SOL`);
-          //   }
-          // }
-
-          // await accountFetch(this.provider.connection,this.escrowAta,this.escrowPda,this.userAta);
-
+          const escow = (await this.program.account.escrow.fetch(escrowPda));
+          console.log("Payment Details: ",escow);
+          console.log("Payment method: ",escow.escrowStatus);
+          console.log("Payment Status: ",escow.releaseFund);
           return {
             success: true,
             transaction: "Account already exists",
@@ -408,26 +407,16 @@ export class Escrow {
         commitment:"confirmed"
       })
       
-      // async function accountFetch(connection:any,escrowAta:PublicKey,escrowPda:PublicKey,userAta:PublicKey,retries = 10) {
-      //   for (let i=0; i<retries; i++){
-      //     const userBal = await connection.getTokenAccountBalance(userAta);
-      //     const escrowBal = await connection.getTokenAccountBalance(escrowAta);
-            
-      //     const userSOL = userBal.value.amount; 
-      //     const escrowSOL = escrowBal.value.amount ;
-            
-      //     console.log("Account Balances:");
-      //     console.log(`Buyer (${walletAdapter.publicKey.toString()}): ${userSOL} SOL`);
-      //     console.log(`Escrow (${escrowPda.toString()}): ${escrowSOL} SOL`);
-      //   }
-      // }
-
-      // await accountFetch(this.provider.connection,this.escrowAta,this.escrowPda,this.userAta);
-
       const [escrowPda] = PublicKey.findProgramAddressSync(
         [Buffer.from("escrow"), walletAdapter.publicKey.toBuffer()],
         new PublicKey(ECOM_PROGRAM_ID)
       );
+
+      const escow = (await this.program.account.escrow.fetch(escrowPda));
+      console.log("Payment Details: ",escow);
+      console.log("Payment method: ",escow.escrowStatus);
+      console.log("Payment Status: ",escow.releaseFund);
+
       return{
         success:true,
         escrowPda:escrowPda,
@@ -483,23 +472,10 @@ export class Escrow {
         commitment:"confirmed"
       })
 
-      // async function accountFetch(connection:any,escrowAta:PublicKey,escrowPda:PublicKey,userAta:PublicKey,retries = 10) {
-      //   for (let i=0; i<retries; i++){
-      //     const userBal = await connection.getTokenAccountBalance(userAta);
-      //     const escrowBal = await connection.getTokenAccountBalance(escrowAta);
-            
-      //     const userSOL = userBal.value.amount; 
-      //     const escrowSOL = escrowBal.value.amount ;
-            
-      //     console.log("Account Balances:");
-      //     console.log(`Buyer (${walletAdapter.publicKey.toString()}): ${userSOL} SOL`);
-      //     console.log(`Escrow (${escrowPda.toString()}): ${escrowSOL} SOL`);
-      //   }
-      // }
-
-      // await accountFetch(this.provider.connection,this.escrowAta,this.escrowPda,this.userAta);
-
-    
+      const payment = (await this.program.account.payment.fetch(paymentPda));
+      console.log("Payment Details: ",payment);
+      console.log("Payment method: ",payment.paymentMethod);
+      console.log("Payment Status: ",payment.paymentStatus);
       return{
         success:true,
         data:escrowPda
@@ -559,21 +535,27 @@ export class Escrow {
       })
       
 
-      async function accountFetch(connection:any,escrowAta:PublicKey,escrowPda:PublicKey,sellerAta:PublicKey,retries = 10) {
-        for (let i=0; i<retries; i++){
-          const sellerBal = await connection.getTokenAccountBalance(sellerAta);
-          const escrowBal = await connection.getTokenAccountBalance(escrowAta);
+      // async function accountFetch(connection:any,escrowAta:PublicKey,escrowPda:PublicKey,sellerAta:PublicKey,retries = 10) {
+      //   for (let i=0; i<retries; i++){
+      //     const sellerBal = await connection.getTokenAccountBalance(sellerAta);
+      //     const escrowBal = await connection.getTokenAccountBalance(escrowAta);
             
-          const escrowSOL = escrowBal.value.amount ;
-          const sellerSOL = sellerBal.value.amount;
+      //     const escrowSOL = escrowBal.value.amount ;
+      //     const sellerSOL = sellerBal.value.amount;
             
-          console.log("Account Balances:");
-          console.log(`Escrow (${escrowPda.toString()}): ${escrowSOL} SOL`);
-          console.log(`Seller (${seller.toString()}): ${sellerSOL} SOL`);
-        }
-      }
+      //     console.log("Account Balances:");
+      //     console.log(`Escrow (${escrowPda.toString()}): ${escrowSOL} SOL`);
+      //     console.log(`Seller (${seller.toString()}): ${sellerSOL} SOL`);
+      //   }
+      // }
 
-      await accountFetch(this.provider.connection,escrowAta,escrowPda,sellerAta);
+      // await accountFetch(this.provider.connection,escrowAta,escrowPda,sellerAta);
+
+      const payment = (await this.program.account.payment.fetch(this.paymentPda));
+      console.log("Payment Details: ",payment);
+      console.log("Payment method: ",payment.paymentMethod);
+      console.log("Payment Status: ",payment.paymentStatus);
+      
 
       return{
         success:true,
@@ -636,17 +618,18 @@ export class Escrow {
       };
     }
   }
-  async closePayment(walletAdapter:AnchorWallet,paymentPda:PublicKey){
-    console.log(`Deleting Account Pda ${this.paymentPda} of ${walletAdapter.toString()}`);
+  async closePayment(walletAdapter:AnchorWallet){
+    console.log(`Deleting Account Pda (${this.paymentPda.toBase58()}) of ${walletAdapter.toString()}`);
+    const payment = this.paymentPda
     try {
       await this.program.methods.closePayment().accounts({
         signer: walletAdapter.publicKey,
-        payments: paymentPda,
+        payments: this.paymentPda,
       }as any).rpc();
-      console.log(`Account -> ${paymentPda} Closed Successfully...`);
+      console.log(`Account -> ${payment} Closed Successfully...`);
       return{
         success:true,
-        closedAccountPda:paymentPda
+        closedAccountPda:this.paymentPda
       };
     } catch (error) {
       return{
