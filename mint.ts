@@ -361,7 +361,9 @@ export class Escrow {
       const payment = (await this.program.account.payment.fetch(paymentPda));
       console.log("Payment Details: ",payment);
       console.log("Payment method: ",payment.paymentMethod);
-      console.log("Payment Status: ",payment.paymentStatus)
+      console.log("Payment Status: ",payment.paymentStatus);
+
+      
 
       const userAta = getAssociatedTokenAddressSync(mint, owner);
       const buyerAta = getAssociatedTokenAddressSync(mint, buyerPubkey);
