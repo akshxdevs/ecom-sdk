@@ -109,6 +109,50 @@
       ]
     },
     {
+      "name": "close_escrow",
+      "discriminator": [
+        139,
+        171,
+        94,
+        146,
+        191,
+        91,
+        144,
+        50
+      ],
+      "accounts": [
+        {
+          "name": "signer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "escrow",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  101,
+                  115,
+                  99,
+                  114,
+                  111,
+                  119
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "signer"
+              }
+            ]
+          }
+        }
+      ],
+      "args": []
+    },
+    {
       "name": "close_payment",
       "discriminator": [
         172,
@@ -217,26 +261,6 @@
               }
             ]
           }
-        },
-        {
-          "name": "user_ata",
-          "writable": true
-        },
-        {
-          "name": "escrow_ata",
-          "writable": true
-        },
-        {
-          "name": "buyer_ata",
-          "writable": true
-        },
-        {
-          "name": "seller_ata",
-          "writable": true
-        },
-        {
-          "name": "token_program",
-          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
         },
         {
           "name": "system_program",
@@ -559,28 +583,38 @@
           }
         },
         {
-          "name": "user_ata",
+          "name": "vault_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "owner"
+              }
+            ]
+          }
+        },
+        {
+          "name": "escrow_account",
           "writable": true
         },
         {
-          "name": "escrow_ata",
-          "writable": true
-        },
-        {
-          "name": "buyer_ata",
-          "writable": true
-        },
-        {
-          "name": "seller_ata",
+          "name": "user_account",
           "writable": true
         },
         {
           "name": "system_program",
           "address": "11111111111111111111111111111111"
-        },
-        {
-          "name": "token_program",
-          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
         }
       ],
       "args": [
@@ -704,28 +738,38 @@
           }
         },
         {
-          "name": "user_ata",
+          "name": "vault_account",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "owner"
+              }
+            ]
+          }
+        },
+        {
+          "name": "escrow_account",
           "writable": true
         },
         {
-          "name": "escrow_ata",
-          "writable": true
-        },
-        {
-          "name": "buyer_ata",
-          "writable": true
-        },
-        {
-          "name": "seller_ata",
+          "name": "seller_account",
           "writable": true
         },
         {
           "name": "system_program",
           "address": "11111111111111111111111111111111"
-        },
-        {
-          "name": "token_program",
-          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
         }
       ],
       "args": [
