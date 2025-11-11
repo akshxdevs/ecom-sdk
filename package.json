@@ -10,22 +10,28 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "packageManager": "pnpm@10.17.1",
+  "packageManager": "pnpm@10.21.0+sha512.da3337267e400fdd3d479a6c68079ac6db01d8ca4f67572083e722775a796788a7a9956613749e000fac20d424b594f7a791a5f4e2e13581c5ef947f26968a40",
   "dependencies": {
+    "@grpc/grpc-js": "^1.14.0",
+    "@grpc/proto-loader": "^0.8.0",
     "@metaplex-foundation/mpl-token-metadata": "^3.4.0",
     "@metaplex-foundation/umi": "^1.4.1",
     "@metaplex-foundation/umi-bundle-defaults": "^1.4.1",
     "@metaplex-foundation/umi-storage-mock": "^1.4.1",
     "@solana/spl-token": "^0.4.13",
+    "@solana/wallet-adapter-react": "^0.15.39",
     "@solana/web3.js": "^1.98.0",
     "@supabase/supabase-js": "^2.49.1",
+    "@triton-one/yellowstone-grpc": "^4.0.2",
     "bn.js": "^5.2.1",
     "bs58": "^6.0.0",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "grammy": "^1.35.0",
+    "grpc-tools": "^1.13.0",
     "openai": "^4.86.1",
-    "together-ai": "^0.13.0"
+    "together-ai": "^0.13.0",
+    "yellowstone-grpc.git": "github:rpcpool/yellowstone-grpc"
   },
   "devDependencies": {
     "@coral-xyz/anchor": "^0.30.1"

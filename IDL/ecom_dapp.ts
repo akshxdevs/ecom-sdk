@@ -115,6 +115,50 @@ export type EcomDapp = {
       ]
     },
     {
+      "name": "closeEscrow",
+      "discriminator": [
+        139,
+        171,
+        94,
+        146,
+        191,
+        91,
+        144,
+        50
+      ],
+      "accounts": [
+        {
+          "name": "signer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "escrow",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  101,
+                  115,
+                  99,
+                  114,
+                  111,
+                  119
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "signer"
+              }
+            ]
+          }
+        }
+      ],
+      "args": []
+    },
+    {
       "name": "closePayment",
       "discriminator": [
         172,
@@ -223,26 +267,6 @@ export type EcomDapp = {
               }
             ]
           }
-        },
-        {
-          "name": "userAta",
-          "writable": true
-        },
-        {
-          "name": "escrowAta",
-          "writable": true
-        },
-        {
-          "name": "buyerAta",
-          "writable": true
-        },
-        {
-          "name": "sellerAta",
-          "writable": true
-        },
-        {
-          "name": "tokenProgram",
-          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
         },
         {
           "name": "systemProgram",
@@ -565,28 +589,38 @@ export type EcomDapp = {
           }
         },
         {
-          "name": "userAta",
+          "name": "vaultAccount",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "owner"
+              }
+            ]
+          }
+        },
+        {
+          "name": "escrowAccount",
           "writable": true
         },
         {
-          "name": "escrowAta",
-          "writable": true
-        },
-        {
-          "name": "buyerAta",
-          "writable": true
-        },
-        {
-          "name": "sellerAta",
+          "name": "userAccount",
           "writable": true
         },
         {
           "name": "systemProgram",
           "address": "11111111111111111111111111111111"
-        },
-        {
-          "name": "tokenProgram",
-          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
         }
       ],
       "args": [
@@ -710,28 +744,38 @@ export type EcomDapp = {
           }
         },
         {
-          "name": "userAta",
+          "name": "vaultAccount",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "owner"
+              }
+            ]
+          }
+        },
+        {
+          "name": "escrowAccount",
           "writable": true
         },
         {
-          "name": "escrowAta",
-          "writable": true
-        },
-        {
-          "name": "buyerAta",
-          "writable": true
-        },
-        {
-          "name": "sellerAta",
+          "name": "sellerAccount",
           "writable": true
         },
         {
           "name": "systemProgram",
           "address": "11111111111111111111111111111111"
-        },
-        {
-          "name": "tokenProgram",
-          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
         }
       ],
       "args": [
