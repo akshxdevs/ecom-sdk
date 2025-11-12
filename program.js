@@ -2,19 +2,6 @@ import * as anchor from "@coral-xyz/anchor";
 import BN from "bn.js";
 import { PublicKey, SystemProgram, Connection, LAMPORTS_PER_SOL, Transaction } from "@solana/web3.js";
 import IDL from "./IDL/ecom_dapp.json";
-import { 
-  TOKEN_PROGRAM_ID,           
-  getAssociatedTokenAddressSync,
-  createAssociatedTokenAccountInstruction,
-  ASSOCIATED_TOKEN_PROGRAM_ID,
-  createMint,
-  getOrCreateAssociatedTokenAccount,
-  mintTo,
-  getAccount,
-} from "@solana/spl-token";
-
-// import { EcomDapp, IDL } from "./IDL/ecom_dapp";
-
 
 const ECOM_PROGRAM_ID = new PublicKey(
   "FYo4gi69vTJZJMnNxj2mZz2Q9CbUu12rQDVtHNUFQ2o7"
@@ -238,62 +225,51 @@ export async function fetchProduct(productPdaString, walletAdapter) {
   }
 }
 
-export async function fetchAllProductsFromSeller(
-  sellerPubkeyString,
-  walletAdapter
-) {
+export async function fetchAllProductsFromSeller(sellerPubkeyString, walletAdapter) {
   try {
     const provider = createProvider(walletAdapter);
     anchor.setProvider(provider);
     const ecomProgram = new anchor.Program(IDL, provider);
 
+    // Get the specific ProductsList PDA for this seller
     const sellerPubkey = new PublicKey(sellerPubkeyString);
     const [productListPda] = PublicKey.findProgramAddressSync(
       [Buffer.from("product_list"), sellerPubkey.toBuffer()],
       ECOM_PROGRAM_ID
     );
 
-    const products = [];
-    const productListData = await ecomProgram.account.productsList.fetch(
-      productListPda
-    );
-    console.log("Fetching individual products...");
-    for (const productPubkey of productListData.products) {
-      try {
-        console.log("Fetching product:", productPubkey.toString());
-        const productData = await ecomProgram.account.product.fetch(
-          productPubkey
-        );
-        console.log("Product data:", productData);
+    const allProducts = [];
 
-        if (!productData) {
-          console.error(
-            "Product data is null/undefined for:",
-            productPubkey.toString()
-          );
-          continue;
+    try {
+      // Fetch the ProductsList account for this specific seller
+      const productList = await ecomProgram.account.productsList.fetch(productListPda);
+      const productPubkeys = productList.products || [];
+
+      for (const pda of productPubkeys) {
+        if (!pda) continue;
+        try {
+          const productData = await ecomProgram.account.product.fetch(pda);
+          allProducts.push({
+            pubkey: pda.toString(),
+            creator: sellerPubkeyString,
+            ...formatProductData(productData),
+          });
+        } catch (err) {
+          console.error(`Failed to fetch product ${pda.toString()}:`, err.message);
         }
-
-        const formattedProduct = {
-          pubkey: productPubkey.toString(),
-          ...formatProductData(productData),
-        };
-        console.log("Formatted product:", formattedProduct);
-        products.push(formattedProduct);
-      } catch (err) {
-        console.error(
-          `Error fetching product ${productPubkey.toString()}:`,
-          err.message
-        );
-        console.error("Full error:", err);
+      }
+    } catch (err) {
+      // ProductsList doesn't exist for this seller yet
+      if (err.message.includes("Account does not exist")) {
+        console.log(`No products found for seller ${sellerPubkeyString}`);
+      } else {
+        throw err;
       }
     }
 
-    console.log("Total products fetched:", products.length);
-
     return {
       success: true,
-      products: products,
+      products: allProducts,
     };
   } catch (error) {
     console.error("Error fetching products:", error.message);
@@ -309,25 +285,30 @@ export async function fetchAllProducts(walletAdapter) {
   try {
     const provider = createProvider(walletAdapter);
     anchor.setProvider(provider);
+    const ecomProgram = new anchor.Program(IDL, provider);
 
-    const sellers = [walletAdapter.publicKey.toString()];
+    // Get all ProductsList accounts from all sellers
+    const productListAccounts = await ecomProgram.account.productsList.all();
+    const allProducts = [];
 
-    let allProducts = [];
+    for (const list of productListAccounts) {
+      const productPubkeys = list.account.products || [];
 
-    for (const sellerPubkeyString of sellers) {
-      try {
-        const result = await fetchAllProductsFromSeller(
-          sellerPubkeyString,
-          walletAdapter
-        );
-        if (result.success && result.products) {
-          allProducts = [...allProducts, ...result.products];
+      for (const pda of productPubkeys) {
+        if (!pda) continue;
+        try {
+          const productData = await ecomProgram.account.product.fetch(pda);
+          const formattedData = formatProductData(productData);
+          // Get seller from the formatted product data
+          const sellerPubkey = formattedData.sellerPubkey || "";
+          allProducts.push({
+            pubkey: pda.toString(),
+            creator: sellerPubkey,
+            ...formattedData,
+          });
+        } catch (err) {
+          console.error(`Failed to fetch product ${pda.toString()}:`, err.message);
         }
-      } catch (err) {
-        console.error(
-          `Error fetching products from seller ${sellerPubkeyString}:`,
-          err.message
-        );
       }
     }
 
@@ -346,7 +327,6 @@ export async function fetchAllProducts(walletAdapter) {
 }
 
 export function formatProductData(productData) {
-  console.log("Raw product data:", productData);
   const normalizePublicKey = (input) => {
     try {
       if (!input) return "";
