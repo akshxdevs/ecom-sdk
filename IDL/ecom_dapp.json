@@ -109,22 +109,46 @@
       ]
     },
     {
-      "name": "close_escrow",
+      "name": "close_all",
       "discriminator": [
-        139,
-        171,
-        94,
-        146,
-        191,
-        91,
-        144,
-        50
+        222,
+        63,
+        176,
+        132,
+        200,
+        69,
+        45,
+        127
       ],
       "accounts": [
         {
           "name": "signer",
           "writable": true,
           "signer": true
+        },
+        {
+          "name": "payment",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  97,
+                  121,
+                  109,
+                  101,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "signer"
+              }
+            ]
+          }
         },
         {
           "name": "escrow",
@@ -148,43 +172,20 @@
               }
             ]
           }
-        }
-      ],
-      "args": []
-    },
-    {
-      "name": "close_payment",
-      "discriminator": [
-        172,
-        106,
-        77,
-        250,
-        247,
-        169,
-        156,
-        178
-      ],
-      "accounts": [
-        {
-          "name": "signer",
-          "writable": true,
-          "signer": true
         },
         {
-          "name": "payments",
+          "name": "vault_state",
           "writable": true,
           "pda": {
             "seeds": [
               {
                 "kind": "const",
                 "value": [
-                  112,
+                  115,
+                  116,
                   97,
-                  121,
-                  109,
-                  101,
-                  110,
-                  116
+                  116,
+                  101
                 ]
               },
               {
@@ -193,6 +194,32 @@
               }
             ]
           }
+        },
+        {
+          "name": "vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "vault_state"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
         }
       ],
       "args": []
@@ -258,6 +285,49 @@
               {
                 "kind": "account",
                 "path": "owner"
+              }
+            ]
+          }
+        },
+        {
+          "name": "vault_state",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  116,
+                  97,
+                  116,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "owner"
+              }
+            ]
+          }
+        },
+        {
+          "name": "vault",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "vault_state"
               }
             ]
           }
@@ -583,7 +653,28 @@
           }
         },
         {
-          "name": "vault_account",
+          "name": "vault_state",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  116,
+                  97,
+                  116,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "owner"
+              }
+            ]
+          }
+        },
+        {
+          "name": "vault",
           "writable": true,
           "pda": {
             "seeds": [
@@ -599,7 +690,7 @@
               },
               {
                 "kind": "account",
-                "path": "owner"
+                "path": "vault_state"
               }
             ]
           }
@@ -609,7 +700,7 @@
           "writable": true
         },
         {
-          "name": "user_account",
+          "name": "user",
           "writable": true
         },
         {
@@ -691,6 +782,10 @@
           "signer": true
         },
         {
+          "name": "seller_account",
+          "writable": true
+        },
+        {
           "name": "escrow",
           "writable": true,
           "pda": {
@@ -738,7 +833,28 @@
           }
         },
         {
-          "name": "vault_account",
+          "name": "vault_state",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  116,
+                  97,
+                  116,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "owner"
+              }
+            ]
+          }
+        },
+        {
+          "name": "vault",
           "writable": true,
           "pda": {
             "seeds": [
@@ -754,18 +870,10 @@
               },
               {
                 "kind": "account",
-                "path": "owner"
+                "path": "vault_state"
               }
             ]
           }
-        },
-        {
-          "name": "escrow_account",
-          "writable": true
-        },
-        {
-          "name": "seller_account",
-          "writable": true
         },
         {
           "name": "system_program",
@@ -870,6 +978,19 @@
         99,
         84,
         70
+      ]
+    },
+    {
+      "name": "VaultState",
+      "discriminator": [
+        228,
+        196,
+        82,
+        165,
+        98,
+        210,
+        235,
+        152
       ]
     }
   ],
@@ -1579,6 +1700,22 @@
           },
           {
             "name": "product_list_bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "VaultState",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "vault_bump",
+            "type": "u8"
+          },
+          {
+            "name": "state_bump",
             "type": "u8"
           }
         ]
