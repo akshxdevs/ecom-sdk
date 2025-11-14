@@ -115,22 +115,46 @@ export type EcomDapp = {
       ]
     },
     {
-      "name": "closeEscrow",
+      "name": "closeAll",
       "discriminator": [
-        139,
-        171,
-        94,
-        146,
-        191,
-        91,
-        144,
-        50
+        222,
+        63,
+        176,
+        132,
+        200,
+        69,
+        45,
+        127
       ],
       "accounts": [
         {
           "name": "signer",
           "writable": true,
           "signer": true
+        },
+        {
+          "name": "payment",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  97,
+                  121,
+                  109,
+                  101,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "signer"
+              }
+            ]
+          }
         },
         {
           "name": "escrow",
@@ -154,43 +178,20 @@ export type EcomDapp = {
               }
             ]
           }
-        }
-      ],
-      "args": []
-    },
-    {
-      "name": "closePayment",
-      "discriminator": [
-        172,
-        106,
-        77,
-        250,
-        247,
-        169,
-        156,
-        178
-      ],
-      "accounts": [
-        {
-          "name": "signer",
-          "writable": true,
-          "signer": true
         },
         {
-          "name": "payments",
+          "name": "vaultState",
           "writable": true,
           "pda": {
             "seeds": [
               {
                 "kind": "const",
                 "value": [
-                  112,
+                  115,
+                  116,
                   97,
-                  121,
-                  109,
-                  101,
-                  110,
-                  116
+                  116,
+                  101
                 ]
               },
               {
@@ -199,6 +200,32 @@ export type EcomDapp = {
               }
             ]
           }
+        },
+        {
+          "name": "vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "vaultState"
+              }
+            ]
+          }
+        },
+        {
+          "name": "systemProgram",
+          "address": "11111111111111111111111111111111"
         }
       ],
       "args": []
@@ -264,6 +291,49 @@ export type EcomDapp = {
               {
                 "kind": "account",
                 "path": "owner"
+              }
+            ]
+          }
+        },
+        {
+          "name": "vaultState",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  116,
+                  97,
+                  116,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "owner"
+              }
+            ]
+          }
+        },
+        {
+          "name": "vault",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "vaultState"
               }
             ]
           }
@@ -589,7 +659,28 @@ export type EcomDapp = {
           }
         },
         {
-          "name": "vaultAccount",
+          "name": "vaultState",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  116,
+                  97,
+                  116,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "owner"
+              }
+            ]
+          }
+        },
+        {
+          "name": "vault",
           "writable": true,
           "pda": {
             "seeds": [
@@ -605,7 +696,7 @@ export type EcomDapp = {
               },
               {
                 "kind": "account",
-                "path": "owner"
+                "path": "vaultState"
               }
             ]
           }
@@ -615,7 +706,7 @@ export type EcomDapp = {
           "writable": true
         },
         {
-          "name": "userAccount",
+          "name": "user",
           "writable": true
         },
         {
@@ -697,6 +788,10 @@ export type EcomDapp = {
           "signer": true
         },
         {
+          "name": "sellerAccount",
+          "writable": true
+        },
+        {
           "name": "escrow",
           "writable": true,
           "pda": {
@@ -744,7 +839,28 @@ export type EcomDapp = {
           }
         },
         {
-          "name": "vaultAccount",
+          "name": "vaultState",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  116,
+                  97,
+                  116,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "owner"
+              }
+            ]
+          }
+        },
+        {
+          "name": "vault",
           "writable": true,
           "pda": {
             "seeds": [
@@ -760,18 +876,10 @@ export type EcomDapp = {
               },
               {
                 "kind": "account",
-                "path": "owner"
+                "path": "vaultState"
               }
             ]
           }
-        },
-        {
-          "name": "escrowAccount",
-          "writable": true
-        },
-        {
-          "name": "sellerAccount",
-          "writable": true
         },
         {
           "name": "systemProgram",
@@ -876,6 +984,19 @@ export type EcomDapp = {
         99,
         84,
         70
+      ]
+    },
+    {
+      "name": "vaultState",
+      "discriminator": [
+        228,
+        196,
+        82,
+        165,
+        98,
+        210,
+        235,
+        152
       ]
     }
   ],
@@ -1585,6 +1706,22 @@ export type EcomDapp = {
           },
           {
             "name": "productListBump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "vaultState",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "vaultBump",
+            "type": "u8"
+          },
+          {
+            "name": "stateBump",
             "type": "u8"
           }
         ]
