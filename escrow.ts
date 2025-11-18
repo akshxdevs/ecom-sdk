@@ -10,7 +10,7 @@ import { BN } from "@coral-xyz/anchor";
 import IDL from "./IDL/ecom_dapp.json";
 import { EcomDapp } from "./IDL/ecom_dapp";
 import { AnchorWallet } from "@solana/wallet-adapter-react";
-import bytesToUuid from "@/app/utils/uuidConverter";
+import bytesToUuid from "./utils/uuidConverter";
 
 const devnet = "https://api.devnet.solana.com";
 
