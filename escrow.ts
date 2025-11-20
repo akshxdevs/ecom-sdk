@@ -368,7 +368,11 @@ export class Escrow {
 
   async updateOrder(walletAdapter:AnchorWallet,updateStatus:string){
     if (!walletAdapter) new Error("Wallet not connected..");
-    
+    [this.orderPda] = PublicKey.findProgramAddressSync(
+      [Buffer.from("order"),walletAdapter.publicKey.toBuffer()],
+      new PublicKey(ECOM_PROGRAM_ID)
+    );
+    console.log("Order PDA: ",this.orderPda.toBase58());
     try {
       if(!this.orderPda) new Error("order pda not found..")
       await this.program.methods.updateOrder(
@@ -386,6 +390,35 @@ export class Escrow {
       return{
         success:true,
         orderStatus:orderDetails,
+        orderPda:this.orderPda
+      };
+    } catch (error) {
+      console.log("Updation Failed",(error as Error).message);
+      return{
+        success:false,
+        error:(error as Error).message
+      };
+    }
+  }
+
+  async fetchOrderStatus(walletAdapter:AnchorWallet){
+    if (!walletAdapter) new Error("Wallet not connected..");
+    [this.orderPda] = PublicKey.findProgramAddressSync(
+      [Buffer.from("order"),walletAdapter.publicKey.toBuffer()],
+      new PublicKey(ECOM_PROGRAM_ID)
+    );
+    try {
+      if(!this.orderPda) new Error("order pda not found..")
+      const orderStatus = (await this.program.account.order.fetch(this.orderPda)).orderStatus;
+      const orderTracking = await (await this.program.account.order.fetch(this.orderPda)).orderTracking;
+      console.log("Order status fetched successfully..");
+      const orderDetails = await this.program.account.order.fetch(this.orderPda);
+      console.log("Order Details: ",orderDetails);
+      return{
+        success:true,
+        orderDetails:orderDetails,
+        orderStatus:orderStatus,
+        orderTracking:orderTracking,
         orderPda:this.orderPda
       };
     } catch (error) {
