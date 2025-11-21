@@ -231,6 +231,53 @@ export type EcomDapp = {
       "args": []
     },
     {
+      "name": "closeOrder",
+      "discriminator": [
+        90,
+        103,
+        209,
+        28,
+        7,
+        63,
+        168,
+        4
+      ],
+      "accounts": [
+        {
+          "name": "signer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "order",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  111,
+                  114,
+                  100,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "signer"
+              }
+            ]
+          }
+        },
+        {
+          "name": "systemProgram",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
       "name": "createEscrow",
       "discriminator": [
         253,
