@@ -72,10 +72,13 @@ export class Escrow {
         new PublicKey(ECOM_PROGRAM_ID)
       )[0];
       this.vaultPda = anchor.web3.PublicKey.findProgramAddressSync(
-        [Buffer.from("vault"), this.vaultState.toBytes()],
+        [Buffer.from("vault"), this.vaultState.toBuffer()],
         new PublicKey(ECOM_PROGRAM_ID)
       )[0];
-      
+      console.log(this.paymentPda.toBase58());
+      console.log(this.escrowPda.toBase58());
+      console.log(this.vaultPda.toBase58());
+      console.log(this.vaultState.toBase58());
       console.log("Intialized Pda's: ");
 
       const info = await this.program.provider.connection.getAccountInfo(this.paymentPda);
@@ -258,29 +261,42 @@ export class Escrow {
     productId: number,
     walletAdapter:AnchorWallet,
     seller:PublicKey,
+    vaultState:PublicKey,
+    vault:PublicKey
   ) {
     if (!walletAdapter) {
       new Error("Wallet not connected..");
     }
     try {
       const owner = walletAdapter.publicKey;
-
+      
       console.log("---WITHDRAW ESCROW---");
+        this.paymentPda = PublicKey.findProgramAddressSync(
+          [Buffer.from("payment"), owner.toBuffer()],
+          new PublicKey(ECOM_PROGRAM_ID)
+        )[0]; console.log(this.paymentPda);
+        
+        this.escrowPda = PublicKey.findProgramAddressSync(
+          [Buffer.from("escrow"), owner.toBuffer()],
+          new PublicKey(ECOM_PROGRAM_ID)
+        )[0];console.log(this.escrowPda);
+
       await this.program.methods.withdrawEscrow(
         productId
       ).accounts({
         owner: owner,
         escrow: this.escrowPda,
         payment: this.paymentPda,
-        vaultState:this.vaultState,
-        vault:this.vaultPda,
+        vaultState:vaultState,
+        vault:vault,
         sellerAccount:seller,
-        systemProgram:SystemProgram.programId
+        systemProgram: SystemProgram.programId,
       }as any).rpc({
         skipPreflight:false,
         preflightCommitment:"confirmed",
         commitment:"confirmed"
       })
+
       const payment = (await this.program.account.payment.fetch(this.paymentPda));
       console.log("Payment Details: ",payment);
       console.log("Payment method: ",payment.paymentMethod);
@@ -296,10 +312,11 @@ export class Escrow {
 
       return{
         success:true,
-        escrowPda:this.escrowPda,
+        escrowPda:this.escrowPda.toBase58(),
+        paymentPda:this.paymentPda.toBase58()
       };
+      
     } catch (error) {
-      await this.closeAccounts(walletAdapter,this.escrowPda,this.paymentPda,this.vaultState,this.vaultPda);
       console.log("Failed to withdraw escrow:", error);
       return{
         success:false,
@@ -321,47 +338,116 @@ export class Escrow {
     const payment = (await this.program.account.payment.fetch(this.paymentPda));
     console.log("Payment Details: ",payment);
     
-    const existingOrder = await this.program.account.order.fetch(this.orderPda);
-    console.log("Existing Order Details: ",existingOrder);
-    console.log("Order ID: ", bytesToUuid(existingOrder.orderId));
-    console.log("Order Status: ",existingOrder.orderStatus);
-    console.log("Order Tracking: ",existingOrder.orderTracking);
-    const orderId = bytesToUuid(existingOrder.orderId);
-    console.log({orderId});
+    // Check if order account exists and is valid
+    const orderAccountInfo = await this.program.provider.connection.getAccountInfo(this.orderPda);
+    
+    // Try to fetch existing order to see if it's properly initialized
+    try {
+      const existingOrder = await this.program.account.order.fetch(this.orderPda);
+      console.log("Existing Order Details: ",existingOrder);
+      console.log("Order ID: ", bytesToUuid(existingOrder.orderId));
+      console.log("Order Status: ",existingOrder.orderStatus);
+      console.log("Order Tracking: ",existingOrder.orderTracking);
+      const orderId = bytesToUuid(existingOrder.orderId);
+      console.log({orderId});
 
-    if (existingOrder){
       return{
         success:true,
         orderId: orderId,
         order:this.orderPda
       };
-    }
-    try {
-        await this.program.methods.createOrder(
-          String(bytesToUuid(payment.paymentId))
-        ).accounts({
-          signer:walletAdapter.publicKey,
-          orderPda:this.orderPda,
-          paymentPda:this.paymentPda,
-          systemProgram:SystemProgram.programId
-        }as any).rpc({
-          skipPreflight:false,
-          commitment:"confirmed",
-          preflightCommitment:"confirmed"
-        });
-        const orderId = (await this.program.account.order.fetch(this.orderPda)).orderId;
-        console.log({orderId});
-        
-        return{
-          success:true,
-          orderId: orderId,
-          order:this.orderPda,
-          payment:this.paymentPda
+    } catch (fetchError) {
+      // Order account exists but is uninitialized/corrupted - close it first
+      if (orderAccountInfo) {
+        console.log("Order account exists but is uninitialized/corrupted. Closing it first...");
+        try {
+          await this.program.methods.closeOrder().accounts({
+            order:this.orderPda,
+            signer:walletAdapter.publicKey,
+            systemProgram:SystemProgram.programId
+          }as any).rpc();
+          console.log("Corrupted order account closed successfully");
+        } catch (closeError) {
+          // If closing fails, it might be because account is truly uninitialized
+          // Try to continue with creation anyway
+          console.log("Could not close order account (may be uninitialized), proceeding with creation...");
         }
-      } catch (error) {
+      }
+    }
+    
+    // Create new order (either doesn't exist or was just closed)
+    console.log("Creating new order...");
+    try {
+      await this.program.methods.createOrder(
+        String(bytesToUuid(payment.paymentId))
+      ).accounts({
+        signer:walletAdapter.publicKey,
+        orderPda:this.orderPda,
+        paymentPda:this.paymentPda,
+        systemProgram:SystemProgram.programId
+      }as any).rpc({
+        skipPreflight:false,
+        commitment:"confirmed",
+        preflightCommitment:"confirmed"
+      });
+      const orderId = (await this.program.account.order.fetch(this.orderPda)).orderId;
+      console.log("Order created successfully. Order ID: ", bytesToUuid(orderId));
+      
+      return{
+        success:true,
+        orderId: bytesToUuid(orderId),
+        order:this.orderPda,
+        payment:this.paymentPda
+      }
+    } catch (error) {
+      console.error("Failed to create order:", error);
+      const errorMessage = (error as Error).message;
+      
+      // If account already exists error, try closing and retrying once
+      if (errorMessage.includes("already in use") || errorMessage.includes("AccountNotInitialized")) {
+        console.log("Retrying after closing account...");
+        try {
+          await this.program.methods.closeOrder().accounts({
+            order:this.orderPda,
+            signer:walletAdapter.publicKey,
+            systemProgram:SystemProgram.programId
+          }as any).rpc();
+          
+          // Retry creation
+          await this.program.methods.createOrder(
+            String(bytesToUuid(payment.paymentId))
+          ).accounts({
+            signer:walletAdapter.publicKey,
+            orderPda:this.orderPda,
+            paymentPda:this.paymentPda,
+            systemProgram:SystemProgram.programId
+          }as any).rpc({
+            skipPreflight:false,
+            commitment:"confirmed",
+            preflightCommitment:"confirmed"
+          });
+          
+          const orderId = (await this.program.account.order.fetch(this.orderPda)).orderId;
+          console.log("Order created successfully after retry. Order ID: ", bytesToUuid(orderId));
+          
+          return{
+            success:true,
+            orderId: bytesToUuid(orderId),
+            order:this.orderPda,
+            payment:this.paymentPda
+          }
+        } catch (retryError) {
+          console.error("Failed to create order after retry:", retryError);
+          return{
+            success:false,
+            error:(retryError as Error).message
+          };
+        }
+      }
+      
       return{
         success:false,
-        error:(error as Error).message
+        error:errorMessage
       };
     }
   }
@@ -374,7 +460,6 @@ export class Escrow {
     );
     console.log("Order PDA: ",this.orderPda.toBase58());
     try {
-      if(!this.orderPda) new Error("order pda not found..")
       await this.program.methods.updateOrder(
         updateStatus,
       ).accounts({
@@ -383,20 +468,77 @@ export class Escrow {
         systemProgram:SystemProgram.programId
       }as any).rpc();
       console.log("Order Updated successfully..");
+      const orderDetails = (await this.program.account.order.fetch(this.orderPda));
+      console.log("Order created successfully after retry. Order ID: ", orderDetails);
+      return{
+        success:true,
+        orderDetails:orderDetails,
+        orderPda:this.orderPda
+      };
+    } catch (err) {
+      console.error("Update failed error:", err);
+      console.error("err.logs:", (err as any).logs || (err as any).errorLogs);
+      return{
+        success:false,
+        error:(err as Error).message
+      };
+    }
+  }
 
-      const orderDetails = await this.program.account.order.fetch(this.orderPda);
-      console.log("Updated OrderStatus: ",orderDetails.orderStatus);
+  async closeOrder(walletAdapter:AnchorWallet) {
+    if (!walletAdapter) new Error("Wallet not connected..");
+    const [orderPda] = PublicKey.findProgramAddressSync(
+      [Buffer.from("order"),walletAdapter.publicKey.toBuffer()],
+      new PublicKey(ECOM_PROGRAM_ID)
+    );
+    console.log("Order PDA: ", orderPda.toBase58());
+    try {
+      const orderInfo = await this.program.provider.connection.getAccountInfo(orderPda);
+      if (!orderInfo) {
+        console.log("Order account does not exist, nothing to close");
+        return {
+          success: true,
+          message: "Order account does not exist, nothing to close",
+          orderPda: orderPda.toBase58()
+        };
+      }
+      try {
+        await this.program.account.order.fetch(orderPda);
+      } catch (fetchError) {
+        console.log("Order account exists but is not properly initialized");
+        return {
+          success: true,
+          message: "Order account is not initialized, nothing to close",
+          orderPda: orderPda.toBase58()
+        };
+      }
+
+      await this.program.methods.closeOrder().accounts({
+        order:orderPda,
+        signer:walletAdapter.publicKey,
+        systemProgram:SystemProgram.programId
+      }as any).rpc();
+      console.log("Order Closed successfully..");
 
       return{
         success:true,
-        orderStatus:orderDetails,
-        orderPda:this.orderPda
+        orderPda:orderPda.toBase58()
       };
     } catch (error) {
-      console.log("Updation Failed",(error as Error).message);
+      const errorMessage = (error as Error).message;
+      if (errorMessage.includes("AccountNotInitialized") || errorMessage.includes("3012")) {
+        console.log("Order account is not initialized, nothing to close");
+        return {
+          success: true,
+          message: "Order account is not initialized, nothing to close",
+          orderPda: orderPda.toBase58()
+        };
+      }
+      console.log("Close Order Failed",(error as Error).cause);
+      console.error(error);
       return{
         success:false,
-        error:(error as Error).message
+        error:errorMessage
       };
     }
   }
@@ -437,14 +579,13 @@ export class Escrow {
       console.log("Vault State Pda: ",vaultState.toString());
       console.log("Vault Pda: ",vaultPda.toString());
       if(!paymentPda || !escrowPda || !vaultState || !vaultPda ) new Error("payment or escrow or vault pda not found")
-      
       const owner = walletAdapter.publicKey;
       await this.program.methods.closeAll().accounts({
         signer: owner,
-        escrow: escrowPda,
-        payments: paymentPda,
-        vaultState: vaultState,
-        vault: vaultPda,
+        escrow: this.escrowPda || escrowPda,
+        payments: this.paymentPda || paymentPda,
+        vaultState: this.vaultState || vaultState,
+        vault: this.vaultPda || vaultPda,
         systemProgram: SystemProgram.programId,
       }as any).rpc();
 
