@@ -1,7 +1,7 @@
 import * as anchor from "@coral-xyz/anchor";
 import BN from "bn.js";
-import { PublicKey, SystemProgram, Connection, LAMPORTS_PER_SOL, Transaction } from "@solana/web3.js";
-import IDL from "./IDL/ecom_dapp.json";
+import { PublicKey, SystemProgram, Connection } from "@solana/web3.js";
+import IDL from "./IDL/blockbazzar.json";
 
 const ECOM_PROGRAM_ID = new PublicKey(
   "FYo4gi69vTJZJMnNxj2mZz2Q9CbUu12rQDVtHNUFQ2o7"

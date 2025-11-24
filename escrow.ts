@@ -1,14 +1,12 @@
 import * as anchor from "@coral-xyz/anchor";
 import {
-  LAMPORTS_PER_SOL,
   PublicKey,
   SystemProgram,
   Connection,
 } from "@solana/web3.js";
 import { BN } from "@coral-xyz/anchor";
-
-import IDL from "./IDL/ecom_dapp.json";
-import { EcomDapp } from "./IDL/ecom_dapp";
+import IDL from "./IDL/blockbazzar.json";
+import { EcomDapp } from "./IDL/blockbazzar";
 import { AnchorWallet } from "@solana/wallet-adapter-react";
 import bytesToUuid from "./utils/uuidConverter";
 
