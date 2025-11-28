@@ -112,7 +112,7 @@ export class Escrow {
       };
     } catch (error) {
       console.error("Something went wrong...", error);
-      await this.closeAccounts(walletAdapter,this.escrowPda,this.paymentPda,this.vaultState,this.vaultPda);
+      await this.closeAccounts(walletAdapter);
       console.log("Payment Closed!");
       return {
         success: false,
@@ -179,7 +179,7 @@ export class Escrow {
         !this.paymentPda.equals(anchor.web3.PublicKey.default)
       ) {
         try {
-          await this.closeAccounts(walletAdapter,this.escrowPda,this.paymentPda,this.vaultState,this.vaultPda);
+          await this.closeAccounts(walletAdapter);
         } catch (closeErr) {
           console.warn(
             "Unable to close payment account while rolling back escrow:",
@@ -247,7 +247,7 @@ export class Escrow {
     
     } catch (error) {
       console.log("Failed to deposit escrow:", error);
-      await this.closeAccounts(walletAdapter,this.escrowPda,this.paymentPda,this.vaultState,this.vaultPda);
+      await this.closeAccounts(walletAdapter);
       return{
         success:false,
         error:(error as Error).message
@@ -267,7 +267,7 @@ export class Escrow {
     }
     try {
       const owner = walletAdapter.publicKey;
-      
+
       console.log("---WITHDRAW ESCROW---");
         this.paymentPda = PublicKey.findProgramAddressSync(
           [Buffer.from("payment"), owner.toBuffer()],
@@ -570,7 +570,46 @@ export class Escrow {
     }
   }
 
-  async closeAccounts(walletAdapter:AnchorWallet,paymentPda:PublicKey,escrowPda:PublicKey,vaultState:PublicKey,vaultPda:PublicKey){
+  async closeAccounts(walletAdapter:AnchorWallet){
+    try {
+      console.log("Escrow Pda: ",this.escrowPda.toString());
+      console.log("Payment Pda: ",this.paymentPda.toString());
+      console.log("Vault State Pda: ",this.vaultState.toString());
+      console.log("Vault Pda: ",this.vaultPda.toString());
+      if(!this.paymentPda || !this.escrowPda || !this.vaultState || !this.vaultPda ) new Error("payment or escrow or vault pda not found")
+      const owner = walletAdapter.publicKey;
+      await this.program.methods.closeAll().accounts({
+        signer: owner,
+        escrow: this.escrowPda, 
+        payments: this.paymentPda, 
+        vaultState: this.vaultState,
+        vault: this.vaultPda,
+        systemProgram:SystemProgram.programId
+      }as any).rpc();
+
+      console.log("Existing payment pda closed successfully..");
+      console.log(`Payment Account(${this.paymentPda}) Closed Successfully! `);
+      console.log(`Escrow Account(${this.escrowPda}) Closed Successfully! `);
+      console.log(`Vault Account(${this.vaultPda}) Closed Successfully! `);
+      console.log(`Vault State Account(${this.vaultState}) Closed Successfully! `);
+      
+      return {
+        success: true,
+        closedAccounts: {
+          escrow: this.escrowPda.toBase58(),    
+          payment: this.paymentPda.toBase58(),
+          vaultState: this.vaultState.toBase58(),
+          vault: this.vaultPda.toBase58(),
+        }
+      };
+    } catch (error) {
+      return{
+        success:false,
+        error:(error as Error).message
+      };
+    }
+  }
+  async closePdaAccounts(walletAdapter:AnchorWallet,paymentPda:PublicKey,escrowPda:PublicKey,vaultState:PublicKey,vaultPda:PublicKey){
     try {
       console.log("Escrow Pda: ",escrowPda.toString());
       console.log("Payment Pda: ",paymentPda.toString());
@@ -580,10 +619,10 @@ export class Escrow {
       const owner = walletAdapter.publicKey;
       await this.program.methods.closeAll().accounts({
         signer: owner,
-        escrow: this.escrowPda || escrowPda,
-        payments: this.paymentPda || paymentPda,
-        vaultState: this.vaultState || vaultState,
-        vault: this.vaultPda || vaultPda,
+        escrow: escrowPda,
+        payments: paymentPda,
+        vaultState: vaultState,
+        vault: vaultPda,
         systemProgram:SystemProgram.programId
       }as any).rpc();
 
@@ -609,4 +648,5 @@ export class Escrow {
       };
     }
   }
+
 }
