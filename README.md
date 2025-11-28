@@ -454,32 +454,47 @@ blockbazzar-sdk/
 
 ---
 
-# Disclaimer
+Disclaimer
+==========
 
-This software is provided **"as is"** without warranty.
+This software is provided **"as is"**, without any warranties of any kind, whether express or implied.\
+This includes, but is not limited to, implied warranties of merchantability, fitness for a particular purpose, and non-infringement.
 
-You assume full responsibility for all blockchain interactions.
+The authors, contributors, and maintainers are **not responsible or liable** for any damages, losses, or issues arising from:
 
-Use at your own risk.
+-   the use or inability to use this software
+
+-   integration errors or misconfiguration
+
+-   defects, bugs, or unexpected behavior
+
+-   blockchain network failures, congestion, or fee spikes
+
+-   loss of funds, assets, accounts, or data
+
+All blockchain interactions involve inherent risks.\
+You are solely responsible for auditing, testing, and validating this software before using it in any production environment.
+
+**Use this software entirely at your own risk.**
+
+By using this SDK, you acknowledge that you have read, understood, and agree to this disclaimer.
+
+* * * * *
 
 Contributing
+============
 
-We welcome contributions! Please submit a pull request or open an issue to discuss any changes.
+Contributions are welcome.\
+Please submit a pull request or open an issue to discuss proposed changes.
+
+* * * * *
 
 License
+=======
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the **MIT License**.\
+See the `LICENSE` file for full details.
 
-Here is a sample "Use at Your Own Risk" disclaimer for a GitHub repository:
+* * * * *
 
-Disclaimer
-
-This software is provided "as is," without warranty of any kind, express or implied, including but not limited to the warranties of merchantability, fitness for a particular purpose, and noninfringement. In no event shall the authors or copyright holders be liable for any claim, damages, or other liability, whether in an action of contract, tort, or otherwise, arising from, out of, or in connection with the software or the use or other dealings in the software.
-
-Use at your own risk. The authors take no responsibility for any harm or damage caused by the use of this software. Users are responsible for ensuring the suitability and safety of this software for their specific use cases.
-
-By using this software, you acknowledge that you have read, understood, and agree to this disclaimer.
-
-Feel free to customize it further to suit the specific context and requirements of your project.
-
-By following this README, you should be able to install the PumpDotFun SDK, run the provided examples, and understand how to set up event listeners and perform token operations.
+If you need a shorter version, stricter legal wording, or a production-grade compliance disclaimer, I can provide that as well.
